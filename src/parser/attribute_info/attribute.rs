@@ -11,7 +11,7 @@ use self::{
   element_value::ElementValue
 };
 
-use super::AttributeInfo;
+use super::{AttributeInfo, code::code_generator::Instructions};
 
 pub mod exception;
 pub mod stack_map_frame;
@@ -27,7 +27,7 @@ pub mod element_value;
 #[derive(Debug)]
 pub enum ATTRIBUTE {
   ConstantValue {constantvalue_index: u16},
-  Code {max_stack: u16, max_locals: u16, code_length: u32, code: Vec<u8>, exception_table_length: u16, exception_table: Vec<Exception>, attributes_count: u16, attributes: Vec<AttributeInfo>},
+  Code {max_stack: u16, max_locals: u16, code_length: u32, code: Vec<Instructions>, exception_table_length: u16, exception_table: Vec<Exception>, attributes_count: u16, attributes: Vec<AttributeInfo>},
   StackMapTable {number_of_entries: u16, entries: Vec<StackMapFrame>},
   Exceptions {number_of_exceptions: u16, exception_index_table: Vec<u16>},
   InnerClasses {number_of_classes: u16, classes: Vec<Classes>},
@@ -46,5 +46,4 @@ pub enum ATTRIBUTE {
   RuntimeInvisibleParameterAnnotations {num_annotations: u16, parameter_annotations: Vec<ParameterAnnotation>},
   AnnotationDefault {attribute_name_index: u16, attribute_length: u32, default_value: ElementValue},
   BootstrapMethods {num_bootstrap_methods: u16, bootstrap_methods: Vec<BootstrapMethod>},
-
 }

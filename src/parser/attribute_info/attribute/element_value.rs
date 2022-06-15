@@ -1,9 +1,9 @@
-use crate::parser::helpers::{get_u8, get_u16};
+use crate::helpers::{get_u8, get_u16};
 
 use super::Annotation;
 
 #[derive(Debug)]
-enum ElementValues {
+pub enum ElementValues {
   ConstValueIndex(u16),
   EnumConstValue{type_name_index: u16, const_name_index: u16},
   ClassInfoIndex(u16),
@@ -13,8 +13,8 @@ enum ElementValues {
 
 #[derive(Debug)]
 pub struct ElementValue {
-  tag: u8,
-  value: ElementValues
+  pub tag: u8,
+  pub value: ElementValues
 }
 
 impl ElementValue {

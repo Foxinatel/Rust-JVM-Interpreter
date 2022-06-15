@@ -1,4 +1,4 @@
-use crate::parser::helpers::get_u16;
+use crate::helpers::get_u16;
 
 use super::attribute::{ATTRIBUTE, local_variable::LocalVariable};
 
@@ -7,5 +7,9 @@ pub fn read(buf: &mut &[u8]) -> ATTRIBUTE {
   let local_variable_table: Vec<LocalVariable> = (0..local_variable_table_length).map(|_|
     LocalVariable::read(buf)
   ).collect();
-  ATTRIBUTE::LocalVariableTable { local_variable_table_length, local_variable_table }
+
+  ATTRIBUTE::LocalVariableTable {
+    local_variable_table_length,
+    local_variable_table
+  }
 }

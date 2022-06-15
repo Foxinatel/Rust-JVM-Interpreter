@@ -1,12 +1,12 @@
-use crate::parser::helpers::get_u16;
+use crate::helpers::get_u16;
 
 #[derive(Debug)]
 pub struct LocalVariableType {
-  start_pc: u16,
-  length: u16,
-  name_index: u16,
-  signature_index: u16,
-  index: u16
+  pub start_pc: u16,
+  pub length: u16,
+  pub name_index: u16,
+  pub signature_index: u16,
+  pub index: u16
 }
 
 impl LocalVariableType {

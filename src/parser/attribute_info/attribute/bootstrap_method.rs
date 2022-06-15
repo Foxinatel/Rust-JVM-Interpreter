@@ -1,10 +1,10 @@
-use crate::parser::{helpers::get_u16, attribute_info::bootstrap_methods};
+use crate::helpers::get_u16;
 
 #[derive(Debug)]
 pub struct BootstrapMethod {
-  bootstrap_method_ref: u16,
-  num_bootstrap_arguments: u16,
-  bootstrap_methods: Vec<u16>
+  pub bootstrap_method_ref: u16,
+  pub num_bootstrap_arguments: u16,
+  pub bootstrap_methods: Vec<u16>
 }
 
 impl BootstrapMethod {
@@ -14,6 +14,11 @@ impl BootstrapMethod {
     let bootstrap_methods: Vec<u16> = (0..num_bootstrap_arguments).map(|_|
       get_u16(buf)
     ).collect();
-    BootstrapMethod { bootstrap_method_ref, num_bootstrap_arguments, bootstrap_methods }
+
+    BootstrapMethod {
+      bootstrap_method_ref,
+      num_bootstrap_arguments,
+      bootstrap_methods
+    }
   }
 }

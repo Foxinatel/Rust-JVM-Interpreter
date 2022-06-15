@@ -1,4 +1,4 @@
-use crate::parser::helpers::{get_u16, get_u32};
+use crate::helpers::{get_u16, get_u32};
 
 use super::attribute::{ATTRIBUTE, element_value::ElementValue};
 

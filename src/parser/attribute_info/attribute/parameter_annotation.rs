@@ -1,11 +1,11 @@
-use crate::parser::helpers::get_u16;
+use crate::helpers::get_u16;
 
 use super::annotation::Annotation;
 
 #[derive(Debug)]
 pub struct ParameterAnnotation {
-  num_annotations: u16,
-  annotations: Vec<Annotation>
+  pub num_annotations: u16,
+  pub annotations: Vec<Annotation>
 }
 
 impl ParameterAnnotation {

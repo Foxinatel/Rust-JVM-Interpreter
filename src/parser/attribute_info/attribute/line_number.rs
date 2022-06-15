@@ -1,9 +1,9 @@
-use crate::parser::helpers::get_u16;
+use crate::helpers::get_u16;
 
 #[derive(Debug)]
 pub struct LineNumber {
-  start_pc: u16,
-  line_number: u16
+  pub start_pc: u16,
+  pub line_number: u16
 }
 
 impl LineNumber {

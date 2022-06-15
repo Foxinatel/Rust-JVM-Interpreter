@@ -1,12 +1,12 @@
-use crate::parser::helpers::get_u16;
+use crate::helpers::get_u16;
 
 use super::element_value::ElementValue;
 
 #[derive(Debug)]
 pub struct Annotation {
-  type_index: u16,
-  num_element_value_pairs: u16,
-  element_value_pairs: Vec<(u16,ElementValue)>
+  pub type_index: u16,
+  pub num_element_value_pairs: u16,
+  pub element_value_pairs: Vec<(u16,ElementValue)>
 }
 
 impl Annotation {
@@ -16,6 +16,11 @@ impl Annotation {
     let element_value_pairs: Vec<(u16,ElementValue)> = (0..num_element_value_pairs).map(|_|
       (get_u16(buf),ElementValue::read(buf))
     ).collect();
-   Annotation { type_index, num_element_value_pairs, element_value_pairs }
+   
+    Annotation {
+      type_index,
+      num_element_value_pairs,
+      element_value_pairs
+    }
   }
 }
