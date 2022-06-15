@@ -1,4 +1,4 @@
-use super::helpers::{get_u8, get_u16};
+use crate::parser::helpers::{get_u8, get_u16};
 
 #[derive(Debug)]
 pub enum VerificationTypeInfo {

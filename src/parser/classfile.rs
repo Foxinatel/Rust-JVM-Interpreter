@@ -1,9 +1,9 @@
 use super::{
-  helpers::{get_u16},
-  CpInfo::{CpInfo},
-  FieldInfo::FieldInfo,
-  MethodInfo::MethodInfo,
-  AttributeInfo::AttributeInfo
+  helpers::get_u16,
+  cp_info::CpInfo,
+  field_info::FieldInfo,
+  method_info::MethodInfo,
+  attribute_info::AttributeInfo,
 };
 
 #[derive(Debug)]

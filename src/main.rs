@@ -4,20 +4,9 @@
 use std::env;
 use std::fs;
 
-use crate::parser::ClassFile::ClassFile;
+use crate::parser::classfile::ClassFile;
 
-mod parser {
-    pub mod ClassFile;
-    pub mod AttributeInfo;
-    pub mod Classes;
-    pub mod CpInfo;
-    pub mod ExceptionTable;
-    pub mod FieldInfo;
-    pub mod helpers;
-    pub mod MethodInfo;
-    pub mod StackMapFrame;
-    pub mod VerificationTypeInfo;
-}
+mod parser;
 
 fn main() {
     let path = env::args().skip(1).next().expect("Expected File Name");

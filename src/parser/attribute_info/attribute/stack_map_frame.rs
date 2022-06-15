@@ -1,7 +1,8 @@
-use super::{
-  helpers::{get_u8, get_u16},
-  VerificationTypeInfo::VerificationTypeInfo
-};
+use crate::parser::helpers::{get_u8, get_u16};
+
+use self::verification_type_info::VerificationTypeInfo;
+
+mod verification_type_info;
 
 #[derive(Debug)]
 pub enum StackMapFrame {

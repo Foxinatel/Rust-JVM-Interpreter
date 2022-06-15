@@ -1,7 +1,7 @@
 use super::{
-  helpers::{get_u16},
-  CpInfo::{CpInfo},
-  AttributeInfo::AttributeInfo
+  helpers::get_u16,
+  cp_info::CpInfo,
+  attribute_info::AttributeInfo,
 };
 
 #[derive(Debug)]
