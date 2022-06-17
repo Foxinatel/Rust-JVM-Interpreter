@@ -1,11 +1,11 @@
-use crate::helpers::get_u16;
+use crate::stream_reader::StreamReader;
 
 use super::attribute::{stack_map_frame::StackMapFrame, ATTRIBUTE};
 
-pub fn read(buf: &mut &[u8]) -> ATTRIBUTE {
-  let number_of_entries = get_u16(buf);
+pub fn read(sr: &mut StreamReader) -> ATTRIBUTE {
+  let number_of_entries = sr.get_u16();
   let entries: Vec<StackMapFrame> = (0..number_of_entries)
-    .map(|_| StackMapFrame::read(buf))
+    .map(|_| StackMapFrame::read(sr))
     .collect();
 
   ATTRIBUTE::StackMapTable {

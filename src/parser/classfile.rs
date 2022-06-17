@@ -1,4 +1,4 @@
-use crate::helpers::get_u16;
+use crate::stream_reader::StreamReader;
 
 use super::{
   attribute_info::AttributeInfo, cp_info::CpInfo, field_info::FieldInfo, method_info::MethodInfo,
@@ -24,33 +24,34 @@ pub struct ClassFile {
 }
 
 impl ClassFile {
-  pub fn read(buf: &mut &[u8]) -> Self {
-    *buf = buf
+  pub fn read(sr: &mut StreamReader) -> Self {
+    sr.stream = sr.stream
       .strip_prefix(&[0xca, 0xfe, 0xba, 0xbe])
-      .expect("File has invalid header");
-    let minor_version = get_u16(buf);
-    let major_version = get_u16(buf);
-    let constant_pool_count = get_u16(buf);
+      .expect("File has invalid header").to_vec();
+    let minor_version = sr.get_u16();
+    let major_version = sr.get_u16();
+    let constant_pool_count = sr.get_u16();
     let constant_pool: Vec<CpInfo> = (1..constant_pool_count)
-      .map(|_| CpInfo::read(buf))
+      .map(|_| CpInfo::read(sr))
       .collect();
-    let access_flags = get_u16(buf);
-    let this_class = get_u16(buf);
-    let super_class = get_u16(buf);
-    let interfaces_count = get_u16(buf);
-    let interfaces: Vec<u16> = (0..interfaces_count).map(|_| get_u16(buf)).collect();
-    let fields_count = get_u16(buf);
+    let access_flags = sr.get_u16();
+    let this_class = sr.get_u16();
+    let super_class = sr.get_u16();
+    let interfaces_count = sr.get_u16();
+    let interfaces: Vec<u16> = (0..interfaces_count).map(|_| sr.get_u16()).collect();
+    let fields_count = sr.get_u16();
     let fields: Vec<FieldInfo> = (0..fields_count)
-      .map(|_| FieldInfo::read(buf, &constant_pool))
+      .map(|_| FieldInfo::read(sr, &constant_pool))
       .collect();
-    let methods_count = get_u16(buf);
+    let methods_count = sr.get_u16();
     let methods: Vec<MethodInfo> = (0..methods_count)
-      .map(|_| MethodInfo::read(buf, &constant_pool))
+      .map(|_| MethodInfo::read(sr, &constant_pool))
       .collect();
-    let attributes_count = get_u16(buf);
+    let attributes_count = sr.get_u16();
     let attributes: Vec<AttributeInfo> = (0..attributes_count)
-      .map(|_| AttributeInfo::read(buf, &constant_pool))
+      .map(|_| AttributeInfo::read(sr, &constant_pool))
       .collect();
+    if !sr.done() {panic!("Extra bytes were found at the end of the classfile")}
 
     return Self {
       minor_version,

@@ -1,11 +1,11 @@
-use crate::helpers::get_u16;
+use crate::stream_reader::StreamReader;
 
 use super::attribute::{parameter_annotation::ParameterAnnotation, ATTRIBUTE};
 
-pub fn read<const VISIBLE: bool>(buf: &mut &[u8]) -> ATTRIBUTE {
-  let num_annotations = get_u16(buf);
+pub fn read<const VISIBLE: bool>(sr: &mut StreamReader) -> ATTRIBUTE {
+  let num_annotations = sr.get_u16();
   let parameter_annotations: Vec<ParameterAnnotation> = (0..num_annotations)
-    .map(|_| ParameterAnnotation::read(buf))
+    .map(|_| ParameterAnnotation::read(sr))
     .collect();
 
   if VISIBLE {

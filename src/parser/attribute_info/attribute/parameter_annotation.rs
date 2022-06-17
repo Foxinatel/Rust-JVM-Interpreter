@@ -1,4 +1,4 @@
-use crate::helpers::get_u16;
+use crate::stream_reader::StreamReader;
 
 use super::annotation::Annotation;
 
@@ -9,10 +9,10 @@ pub struct ParameterAnnotation {
 }
 
 impl ParameterAnnotation {
-  pub fn read(buf: &mut &[u8]) -> Self {
-    let num_annotations = get_u16(buf);
+  pub fn read(sr: &mut StreamReader) -> Self {
+    let num_annotations = sr.get_u16();
     let annotations: Vec<Annotation> = (0..num_annotations)
-      .map(|_| Annotation::read(buf))
+      .map(|_| Annotation::read(sr))
       .collect();
     ParameterAnnotation {
       num_annotations,

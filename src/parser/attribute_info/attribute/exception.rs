@@ -1,4 +1,4 @@
-use crate::helpers::get_u16;
+use crate::stream_reader::StreamReader;
 
 #[derive(Debug)]
 pub struct Exception {
@@ -9,12 +9,12 @@ pub struct Exception {
 }
 
 impl Exception {
-  pub fn read(buf: &mut &[u8]) -> Self {
+  pub fn read(sr: &mut StreamReader) -> Self {
     return Self {
-      start_pc: get_u16(buf),
-      end_pc: get_u16(buf),
-      handler_pc: get_u16(buf),
-      catch_type: get_u16(buf),
+      start_pc: sr.get_u16(),
+      end_pc: sr.get_u16(),
+      handler_pc: sr.get_u16(),
+      catch_type: sr.get_u16(),
     };
   }
 }

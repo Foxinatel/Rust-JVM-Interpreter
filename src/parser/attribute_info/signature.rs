@@ -1,9 +1,9 @@
-use crate::helpers::get_u16;
+use crate::stream_reader::StreamReader;
 
 use super::attribute::ATTRIBUTE;
 
-pub fn read(buf: &mut &[u8]) -> ATTRIBUTE {
+pub fn read(sr: &mut StreamReader) -> ATTRIBUTE {
   ATTRIBUTE::Signature {
-    signature_index: get_u16(buf),
+    signature_index: sr.get_u16(),
   }
 }

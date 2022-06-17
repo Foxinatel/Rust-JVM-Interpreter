@@ -1,4 +1,4 @@
-use crate::helpers::get_u16;
+use crate::stream_reader::StreamReader;
 
 #[derive(Debug)]
 pub struct BootstrapMethod {
@@ -8,10 +8,10 @@ pub struct BootstrapMethod {
 }
 
 impl BootstrapMethod {
-  pub fn read(buf: &mut &[u8]) -> Self {
-    let bootstrap_method_ref = get_u16(buf);
-    let num_bootstrap_arguments = get_u16(buf);
-    let bootstrap_methods: Vec<u16> = (0..num_bootstrap_arguments).map(|_| get_u16(buf)).collect();
+  pub fn read(sr: &mut StreamReader) -> Self {
+    let bootstrap_method_ref = sr.get_u16();
+    let num_bootstrap_arguments = sr.get_u16();
+    let bootstrap_methods: Vec<u16> = (0..num_bootstrap_arguments).map(|_| sr.get_u16()).collect();
 
     BootstrapMethod {
       bootstrap_method_ref,

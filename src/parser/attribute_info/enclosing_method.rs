@@ -1,10 +1,10 @@
-use crate::helpers::get_u16;
+use crate::stream_reader::StreamReader;
 
 use super::attribute::ATTRIBUTE;
 
-pub fn read(buf: &mut &[u8]) -> ATTRIBUTE {
+pub fn read(sr: &mut StreamReader) -> ATTRIBUTE {
   ATTRIBUTE::EnclosingMethod {
-    class_index: get_u16(buf),
-    method_index: get_u16(buf),
+    class_index: sr.get_u16(),
+    method_index: sr.get_u16(),
   }
 }

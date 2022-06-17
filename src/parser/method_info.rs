@@ -1,4 +1,4 @@
-use crate::helpers::get_u16;
+use crate::stream_reader::StreamReader;
 
 use super::{attribute_info::AttributeInfo, cp_info::CpInfo};
 
@@ -12,13 +12,13 @@ pub struct MethodInfo {
 }
 
 impl MethodInfo {
-  pub fn read(buf: &mut &[u8], constant_pool: &Vec<CpInfo>) -> Self {
-    let access_flags = get_u16(buf);
-    let name_index = get_u16(buf);
-    let descriptor_index = get_u16(buf);
-    let attributes_count = get_u16(buf);
+  pub fn read(sr: &mut StreamReader, constant_pool: &Vec<CpInfo>) -> Self {
+    let access_flags = sr.get_u16();
+    let name_index = sr.get_u16();
+    let descriptor_index = sr.get_u16();
+    let attributes_count = sr.get_u16();
     let attributes: Vec<AttributeInfo> = (0..attributes_count)
-      .map(|_| AttributeInfo::read(buf, constant_pool))
+      .map(|_| AttributeInfo::read(sr, constant_pool))
       .collect();
 
     Self {

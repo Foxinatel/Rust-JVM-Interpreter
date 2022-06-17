@@ -1,29 +1,31 @@
-use self::code_generator::generate_instructions;
+use self::{code_generator::generate_instructions, clean_jumps::clean};
 
 use super::{
   attribute::{exception::Exception, ATTRIBUTE},
   AttributeInfo,
 };
 use crate::{
-  helpers::{get_u16, get_u32},
   parser::cp_info::CpInfo,
+  stream_reader::StreamReader,
 };
 
 pub mod code_generator;
+pub mod clean_jumps;
 
-pub fn read(buf: &mut &[u8], constant_pool: &Vec<CpInfo>) -> ATTRIBUTE {
-  let max_stack = get_u16(buf);
-  let max_locals = get_u16(buf);
-  let code_length = get_u32(buf);
-  let raw_code = buf.take(..(code_length as usize)).unwrap();
-  let code = generate_instructions(&mut &raw_code[..]);
-  let exception_table_length = get_u16(buf);
+pub fn read(sr: &mut StreamReader, constant_pool: &Vec<CpInfo>) -> ATTRIBUTE {
+  let max_stack = sr.get_u16();
+  let max_locals = sr.get_u16();
+  let code_length = sr.get_u32();
+  let raw_code = sr.take_n(code_length as usize);
+  let tuple_code = generate_instructions(&mut StreamReader::from(raw_code));
+  let code = clean(tuple_code);
+  let exception_table_length = sr.get_u16();
   let exception_table: Vec<Exception> = (0..exception_table_length)
-    .map(|_| Exception::read(buf))
+    .map(|_| Exception::read(sr))
     .collect();
-  let attributes_count = get_u16(buf);
+  let attributes_count = sr.get_u16();
   let attributes: Vec<AttributeInfo> = (0..attributes_count)
-    .map(|_| AttributeInfo::read(buf, constant_pool))
+    .map(|_| AttributeInfo::read(sr, constant_pool))
     .collect();
 
   ATTRIBUTE::Code {

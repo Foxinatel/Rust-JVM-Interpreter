@@ -1,10 +1,10 @@
 use super::attribute::{bootstrap_method::BootstrapMethod, ATTRIBUTE};
-use crate::helpers::get_u16;
+use crate::stream_reader::StreamReader;
 
-pub fn read(buf: &mut &[u8]) -> ATTRIBUTE {
-  let num_bootstrap_methods = get_u16(buf);
+pub fn read(sr: &mut StreamReader) -> ATTRIBUTE {
+  let num_bootstrap_methods = sr.get_u16();
   let bootstrap_methods: Vec<BootstrapMethod> = (0..num_bootstrap_methods)
-    .map(|_| BootstrapMethod::read(buf))
+    .map(|_| BootstrapMethod::read(sr))
     .collect();
 
   ATTRIBUTE::BootstrapMethods {

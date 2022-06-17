@@ -1,4 +1,4 @@
-use crate::helpers::get_u16;
+use crate::stream_reader::StreamReader;
 
 #[derive(Debug)]
 pub struct LocalVariableType {
@@ -10,13 +10,13 @@ pub struct LocalVariableType {
 }
 
 impl LocalVariableType {
-  pub fn read(buf: &mut &[u8]) -> Self {
+  pub fn read(sr: &mut StreamReader) -> Self {
     LocalVariableType {
-      start_pc: get_u16(buf),
-      length: get_u16(buf),
-      name_index: get_u16(buf),
-      signature_index: get_u16(buf),
-      index: get_u16(buf),
+      start_pc: sr.get_u16(),
+      length: sr.get_u16(),
+      name_index: sr.get_u16(),
+      signature_index: sr.get_u16(),
+      index: sr.get_u16(),
     }
   }
 }

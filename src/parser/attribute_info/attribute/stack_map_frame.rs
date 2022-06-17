@@ -1,4 +1,4 @@
-use crate::helpers::{get_u16, get_u8};
+use crate::stream_reader::StreamReader;
 
 use self::verification_type_info::VerificationTypeInfo;
 
@@ -42,31 +42,31 @@ pub enum StackMapFrame {
 }
 
 impl StackMapFrame {
-  pub fn read(buf: &mut &[u8]) -> Self {
-    let frame_type = get_u8(buf);
+  pub fn read(sr: &mut StreamReader) -> Self {
+    let frame_type = sr.get_u8();
     match frame_type {
       (0..=63) => StackMapFrame::SameFrame { frame_type },
       (64..=127) => StackMapFrame::SameLocals1StackItemFrame {
         frame_type,
-        stack: [VerificationTypeInfo::read(buf)],
+        stack: [VerificationTypeInfo::read(sr)],
       },
       247 => StackMapFrame::SameLocals1StackItemFrameExtended {
         frame_type,
-        offset_delta: get_u16(buf),
-        stack: [VerificationTypeInfo::read(buf)],
+        offset_delta: sr.get_u16(),
+        stack: [VerificationTypeInfo::read(sr)],
       },
       (248..=250) => StackMapFrame::ChopFrame {
         frame_type,
-        offset_delta: get_u16(buf),
+        offset_delta: sr.get_u16(),
       },
       251 => StackMapFrame::SameFrameExtended {
         frame_type,
-        offset_delta: get_u16(buf),
+        offset_delta: sr.get_u16(),
       },
       (252..=254) => {
-        let offset_delta = get_u16(buf);
+        let offset_delta = sr.get_u16();
         let locals: Vec<VerificationTypeInfo> = (0..frame_type - 251)
-          .map(|_| VerificationTypeInfo::read(buf))
+          .map(|_| VerificationTypeInfo::read(sr))
           .collect();
         StackMapFrame::AppendFrame {
           frame_type,
@@ -75,14 +75,14 @@ impl StackMapFrame {
         }
       }
       255 => {
-        let offset_delta = get_u16(buf);
-        let number_of_locals = get_u16(buf);
+        let offset_delta = sr.get_u16();
+        let number_of_locals = sr.get_u16();
         let locals: Vec<VerificationTypeInfo> = (0..number_of_locals)
-          .map(|_| VerificationTypeInfo::read(buf))
+          .map(|_| VerificationTypeInfo::read(sr))
           .collect();
-        let number_of_stack_items = get_u16(buf);
+        let number_of_stack_items = sr.get_u16();
         let stack: Vec<VerificationTypeInfo> = (0..number_of_stack_items)
-          .map(|_| VerificationTypeInfo::read(buf))
+          .map(|_| VerificationTypeInfo::read(sr))
           .collect();
         StackMapFrame::FullFrame {
           frame_type,

@@ -1,4 +1,4 @@
-use crate::helpers::{get_u16, get_u32};
+use crate::stream_reader::StreamReader;
 
 use self::attribute::ATTRIBUTE;
 
@@ -30,35 +30,35 @@ pub struct AttributeInfo {
 }
 
 impl AttributeInfo {
-  pub fn read(buf: &mut &[u8], constant_pool: &Vec<CpInfo>) -> Self {
-    let attribute_name_index = get_u16(buf);
-    let attribute_length = get_u32(buf);
+  pub fn read(sr: &mut StreamReader, constant_pool: &Vec<CpInfo>) -> Self {
+    let attribute_name_index = sr.get_u16();
+    let attribute_length = sr.get_u32();
     let attribute = match &constant_pool[attribute_name_index as usize - 1] {
       CpInfo::Utf8 {
         tag: _,
         length: _,
         bytes,
       } => match bytes.as_str() {
-        "ConstantValue" => constant_value::read(buf),
-        "Code" => code::read(buf, constant_pool),
-        "StackMapTable" => stack_map_table::read(buf),
-        "Exceptions" => exceptions::read(buf),
-        "InnerClasses" => inner_classes::read(buf),
-        "EnclosingMethod" => enclosing_method::read(buf),
+        "ConstantValue" => constant_value::read(sr),
+        "Code" => code::read(sr, constant_pool),
+        "StackMapTable" => stack_map_table::read(sr),
+        "Exceptions" => exceptions::read(sr),
+        "InnerClasses" => inner_classes::read(sr),
+        "EnclosingMethod" => enclosing_method::read(sr),
         "Synthetic" => ATTRIBUTE::Synthetic,
-        "Signature" => signature::read(buf),
-        "SourceFile" => source_file::read(buf),
-        "SourceDebugExtension" => source_debug_extensions::read(buf, attribute_length),
-        "LineNumberTable" => line_number_table::read(buf),
-        "LocalVariableTable" => local_variable_table::read(buf),
-        "LocalVariableTypeTable" => local_variable_type_table::read(buf),
+        "Signature" => signature::read(sr),
+        "SourceFile" => source_file::read(sr),
+        "SourceDebugExtension" => source_debug_extensions::read(sr, attribute_length),
+        "LineNumberTable" => line_number_table::read(sr),
+        "LocalVariableTable" => local_variable_table::read(sr),
+        "LocalVariableTypeTable" => local_variable_type_table::read(sr),
         "Deprecated" => ATTRIBUTE::Deprecated,
-        "RuntimeVisibleAnnotations" => runtime_annotations::read::<true>(buf),
-        "RuntimeInvisibleAnnotations" => runtime_annotations::read::<false>(buf),
-        "RuntimeVisibleParameterAnnotations" => runtime_parameter_annotations::read::<true>(buf),
-        "RuntimeInvisibleParameterAnnotations" => runtime_parameter_annotations::read::<false>(buf),
-        "AnnotationDefault" => annotation_default::read(buf),
-        "BootstrapMethods" => bootstrap_methods::read(buf),
+        "RuntimeVisibleAnnotations" => runtime_annotations::read::<true>(sr),
+        "RuntimeInvisibleAnnotations" => runtime_annotations::read::<false>(sr),
+        "RuntimeVisibleParameterAnnotations" => runtime_parameter_annotations::read::<true>(sr),
+        "RuntimeInvisibleParameterAnnotations" => runtime_parameter_annotations::read::<false>(sr),
+        "AnnotationDefault" => annotation_default::read(sr),
+        "BootstrapMethods" => bootstrap_methods::read(sr),
         _ => todo!(),
       },
       _ => panic!(

@@ -1,4 +1,4 @@
-use crate::helpers::get_u16;
+use crate::stream_reader::StreamReader;
 
 use super::element_value::ElementValue;
 
@@ -10,11 +10,11 @@ pub struct Annotation {
 }
 
 impl Annotation {
-  pub fn read(buf: &mut &[u8]) -> Self {
-    let type_index = get_u16(buf);
-    let num_element_value_pairs = get_u16(buf);
+  pub fn read(sr: &mut StreamReader) -> Self {
+    let type_index = sr.get_u16();
+    let num_element_value_pairs = sr.get_u16();
     let element_value_pairs: Vec<(u16, ElementValue)> = (0..num_element_value_pairs)
-      .map(|_| (get_u16(buf), ElementValue::read(buf)))
+      .map(|_| (sr.get_u16(), ElementValue::read(sr)))
       .collect();
 
     Annotation {

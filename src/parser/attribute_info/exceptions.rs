@@ -1,10 +1,10 @@
-use crate::helpers::get_u16;
+use crate::stream_reader::StreamReader;
 
 use super::attribute::ATTRIBUTE;
 
-pub fn read(buf: &mut &[u8]) -> ATTRIBUTE {
-  let number_of_exceptions = get_u16(buf);
-  let exception_index_table: Vec<u16> = (0..number_of_exceptions).map(|_| get_u16(buf)).collect();
+pub fn read(sr: &mut StreamReader) -> ATTRIBUTE {
+  let number_of_exceptions = sr.get_u16();
+  let exception_index_table: Vec<u16> = (0..number_of_exceptions).map(|_| sr.get_u16()).collect();
 
   ATTRIBUTE::Exceptions {
     number_of_exceptions,

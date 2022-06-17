@@ -1,4 +1,4 @@
-use crate::helpers::get_u16;
+use crate::stream_reader::StreamReader;
 
 #[derive(Debug)]
 pub struct LineNumber {
@@ -7,10 +7,10 @@ pub struct LineNumber {
 }
 
 impl LineNumber {
-  pub fn read(buf: &mut &[u8]) -> Self {
+  pub fn read(sr: &mut StreamReader) -> Self {
     LineNumber {
-      start_pc: get_u16(buf),
-      line_number: get_u16(buf),
+      start_pc: sr.get_u16(),
+      line_number: sr.get_u16(),
     }
   }
 }

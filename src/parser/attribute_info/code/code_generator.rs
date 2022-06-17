@@ -1,6 +1,6 @@
-use crate::helpers::{get_i16, get_i32, get_i8, get_u16, get_u8};
+use crate::stream_reader::StreamReader;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[allow(non_camel_case_types)]
 pub enum Instructions {
   nop,
@@ -288,15 +288,15 @@ pub enum Instructions {
     offset: i32,
   },
 }
-
-pub fn generate_instructions(code: &mut &[u8]) -> Vec<Instructions> {
+ 
+pub fn generate_instructions(sr: &mut StreamReader) -> Vec<(usize, Instructions)> {
   let mut instructions = Vec::new();
   loop {
-    if code.is_empty() {
+    if sr.done() {
       return instructions;
     }
-    let inst = get_u8(code);
-    instructions.push(match inst {
+    let inst = sr.get_u8();
+    instructions.push((sr.ptr,match inst {
       0 => Instructions::nop,
       1 => Instructions::aconst_null,
       (2..=8) => Instructions::iconst {
@@ -312,34 +312,34 @@ pub fn generate_instructions(code: &mut &[u8]) -> Vec<Instructions> {
         value: inst as f64 - 14.0,
       },
       16 => Instructions::bipush {
-        value: get_i8(code),
+        value: sr.get_i8(),
       },
       17 => Instructions::sipush {
-        value: get_i16(code),
+        value: sr.get_i16(),
       },
       18 => Instructions::ldc {
-        index: get_u8(code),
+        index: sr.get_u8(),
       },
       19 => Instructions::ldc_w {
-        index: get_u16(code),
+        index: sr.get_u16(),
       },
       20 => Instructions::ldc2_w {
-        index: get_u16(code),
+        index: sr.get_u16(),
       },
       21 => Instructions::iload {
-        index: get_u8(code),
+        index: sr.get_u8(),
       },
       22 => Instructions::lload {
-        index: get_u8(code),
+        index: sr.get_u8(),
       },
       23 => Instructions::fload {
-        index: get_u8(code),
+        index: sr.get_u8(),
       },
       24 => Instructions::dload {
-        index: get_u8(code),
+        index: sr.get_u8(),
       },
       25 => Instructions::aload {
-        index: get_u8(code),
+        index: sr.get_u8(),
       },
       (26..=29) => Instructions::iload { index: inst - 26 },
       (30..=33) => Instructions::lload { index: inst - 30 },
@@ -355,19 +355,19 @@ pub fn generate_instructions(code: &mut &[u8]) -> Vec<Instructions> {
       52 => Instructions::caload,
       53 => Instructions::saload,
       54 => Instructions::istore {
-        index: get_u8(code),
+        index: sr.get_u8(),
       },
       55 => Instructions::lstore {
-        index: get_u8(code),
+        index: sr.get_u8(),
       },
       56 => Instructions::fstore {
-        index: get_u8(code),
+        index: sr.get_u8(),
       },
       57 => Instructions::dstore {
-        index: get_u8(code),
+        index: sr.get_u8(),
       },
       58 => Instructions::astore {
-        index: get_u8(code),
+        index: sr.get_u8(),
       },
       (59..=62) => Instructions::istore { index: inst - 59 },
       (63..=66) => Instructions::lstore { index: inst - 63 },
@@ -428,8 +428,8 @@ pub fn generate_instructions(code: &mut &[u8]) -> Vec<Instructions> {
       130 => Instructions::ixor,
       131 => Instructions::lxor,
       132 => Instructions::iinc {
-        index: get_u8(code),
-        r#const: get_i8(code),
+        index: sr.get_u8(),
+        r#const: sr.get_i8(),
       },
       133 => Instructions::i2l,
       134 => Instructions::i2f,
@@ -452,61 +452,61 @@ pub fn generate_instructions(code: &mut &[u8]) -> Vec<Instructions> {
       151 => Instructions::dcmpl,
       152 => Instructions::dcmpg,
       153 => Instructions::ifeq {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       154 => Instructions::ifne {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       155 => Instructions::iflt {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       156 => Instructions::ifge {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       157 => Instructions::ifgt {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       158 => Instructions::ifle {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       159 => Instructions::if_icmpeq {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       160 => Instructions::if_icmpne {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       161 => Instructions::if_icmplt {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       162 => Instructions::if_icmpge {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       163 => Instructions::if_icmpgt {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       164 => Instructions::if_icmple {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       165 => Instructions::if_acmpeq {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       166 => Instructions::if_acmpne {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       167 => Instructions::goto {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       168 => Instructions::jsr {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       169 => Instructions::ret {
-        index: get_u8(code),
+        index: sr.get_u8(),
       },
       170 => {
-        let default = get_i32(code);
-        let low = get_i32(code);
-        let high = get_i32(code);
-        let offsets: Vec<i32> = (0..high - low + 1).map(|_| get_i32(code)).collect();
+        let default = sr.get_i32();
+        let low = sr.get_i32();
+        let high = sr.get_i32();
+        let offsets: Vec<i32> = (0..high - low + 1).map(|_| sr.get_i32()).collect();
         Instructions::tableswitch {
           default,
           low,
@@ -515,10 +515,10 @@ pub fn generate_instructions(code: &mut &[u8]) -> Vec<Instructions> {
         }
       }
       171 => {
-        let default = get_i32(code);
-        let npairs = get_i32(code);
+        let default = sr.get_i32();
+        let npairs = sr.get_i32();
         let pairs: Vec<(i32, i32)> = (0..npairs)
-          .map(|_| (get_i32(code), get_i32(code)))
+          .map(|_| (sr.get_i32(), sr.get_i32()))
           .collect();
         Instructions::lookupswith {
           default,
@@ -533,92 +533,92 @@ pub fn generate_instructions(code: &mut &[u8]) -> Vec<Instructions> {
       176 => Instructions::areturn,
       177 => Instructions::r#return,
       178 => Instructions::getstatic {
-        index: get_u16(code),
+        index: sr.get_u16(),
       },
       179 => Instructions::putstatic {
-        index: get_u16(code),
+        index: sr.get_u16(),
       },
       180 => Instructions::getfield {
-        index: get_u16(code),
+        index: sr.get_u16(),
       },
       181 => Instructions::putfield {
-        index: get_u16(code),
+        index: sr.get_u16(),
       },
       182 => Instructions::invokevirtual {
-        index: get_u16(code),
+        index: sr.get_u16(),
       },
       183 => Instructions::invokespecial {
-        index: get_u16(code),
+        index: sr.get_u16(),
       },
       184 => Instructions::invokestatic {
-        index: get_u16(code),
+        index: sr.get_u16(),
       },
       185 => {
-        let index = get_u16(code);
-        let count = get_u8(code);
-        assert_eq!(get_u8(code), 0, "Final byte of invokestatic was non-zero");
+        let index = sr.get_u16();
+        let count = sr.get_u8();
+        assert_eq!(sr.get_u8(), 0, "Final byte of invokestatic was non-zero");
         Instructions::invokeinterface { index, count }
       }
       186 => {
-        let index = get_u16(code);
+        let index = sr.get_u16();
         assert_eq!(
-          get_u16(code),
+          sr.get_u16(),
           0,
           "Final bytes of invokedynamic was non-zero"
         );
         Instructions::invokedynamic { index }
       }
       187 => Instructions::new {
-        index: get_u16(code),
+        index: sr.get_u16(),
       },
       188 => Instructions::newarray {
-        atype: get_u8(code),
+        atype: sr.get_u8(),
       },
       189 => Instructions::anewarray {
-        index: get_u16(code),
+        index: sr.get_u16(),
       },
       190 => Instructions::arraylength,
       191 => Instructions::athrow,
       192 => Instructions::checkcast {
-        index: get_u16(code),
+        index: sr.get_u16(),
       },
       193 => Instructions::instanceof {
-        index: get_u16(code),
+        index: sr.get_u16(),
       },
       194 => Instructions::monitorenter,
       195 => Instructions::monitorexit,
       196 => {
-        let opcode = get_u8(code);
+        let opcode = sr.get_u8();
         match opcode {
           (21..=25) | (54..=58) | 169 => Instructions::wide1 {
             opcode,
-            index_extension: get_u16(code),
+            index_extension: sr.get_u16(),
           },
           132 => Instructions::wide2 {
             opcode,
-            index_extension: get_u16(code),
-            constbytes: get_i16(code),
+            index_extension: sr.get_u16(),
+            constbytes: sr.get_i16(),
           },
           _ => panic!("Attempted to perform 'wide' on invalid opcode"),
         }
       }
       197 => Instructions::multianewarray {
-        index: get_u16(code),
-        dimensions: get_u8(code),
+        index: sr.get_u16(),
+        dimensions: sr.get_u8(),
       },
       198 => Instructions::ifnull {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       199 => Instructions::ifnonnull {
-        offset: get_i16(code),
+        offset: sr.get_i16(),
       },
       200 => Instructions::goto_w {
-        offset: get_i32(code),
+        offset: sr.get_i32(),
       },
       201 => Instructions::jsr_w {
-        offset: get_i32(code),
+        offset: sr.get_i32(),
       },
       (202..) => panic!("Instruction not yet implemented"),
-    });
+    }));
   }
 }

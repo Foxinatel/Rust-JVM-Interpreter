@@ -1,4 +1,4 @@
-use crate::helpers::{get_u16, get_u8};
+use crate::stream_reader::StreamReader;
 
 use super::Annotation;
 
@@ -24,21 +24,21 @@ pub struct ElementValue {
 }
 
 impl ElementValue {
-  pub fn read(buf: &mut &[u8]) -> Self {
-    let tag = get_u8(buf);
+  pub fn read(sr: &mut StreamReader) -> Self {
+    let tag = sr.get_u8();
     let value = match tag as char {
       'B' | 'C' | 'D' | 'F' | 'I' | 'J' | 'S' | 'Z' | 's' => {
-        ElementValues::ConstValueIndex(get_u16(buf))
+        ElementValues::ConstValueIndex(sr.get_u16())
       }
       'e' => ElementValues::EnumConstValue {
-        type_name_index: get_u16(buf),
-        const_name_index: get_u16(buf),
+        type_name_index: sr.get_u16(),
+        const_name_index: sr.get_u16(),
       },
-      'c' => ElementValues::ClassInfoIndex(get_u16(buf)),
-      '@' => ElementValues::AnnotationValue(Annotation::read(buf)),
+      'c' => ElementValues::ClassInfoIndex(sr.get_u16()),
+      '@' => ElementValues::AnnotationValue(Annotation::read(sr)),
       '[' => {
-        let num_values = get_u16(buf);
-        let values: Vec<ElementValue> = (0..num_values).map(|_| ElementValue::read(buf)).collect();
+        let num_values = sr.get_u16();
+        let values: Vec<ElementValue> = (0..num_values).map(|_| ElementValue::read(sr)).collect();
         ElementValues::ArrayValue { num_values, values }
       }
       _ => panic!(),

@@ -1,23 +1,24 @@
-#![feature(split_array)]
-#![feature(slice_take)]
+#![feature(let_else)]
 
-use std::env;
-use std::fs;
+use std::{env, fs};
 
 use crate::parser::attribute_info::attribute::ATTRIBUTE;
 use crate::parser::attribute_info::code::code_generator::Instructions;
 use crate::parser::classfile::ClassFile;
+use crate::stream_reader::StreamReader;
 
 mod evaluate;
-mod helpers;
 mod parser;
+mod stream_reader;
 
 fn main() {
   let path = env::args().skip(1).next().expect("Expected File Name");
-  let mut buf = &fs::read(path.clone())
-    .or(fs::read(path.clone() + ".class"))
-    .expect(format!("Could not find a file at {0} or {0}.class", path).as_str())[..];
-  let cf = ClassFile::read(&mut buf);
+  let buf = fs::read(path.clone()).or(fs::read(path.clone() + ".class")).expect(
+    format!("Could not find a file at {0} or {0}.class", path).as_str()
+  );
+  let mut sr = StreamReader::from(buf);
+
+  let cf = ClassFile::read(&mut sr);
   println!("{:#?}", cf);
 
   let jvm = evaluate::JVM {
@@ -28,8 +29,8 @@ fn main() {
     max_locals: 0,
     code_length: 2,
     code: vec![
-      Instructions::iconst { value: 0 },
-      Instructions::istore { index: 1 },
+      Instructions::iconst { value: 5 },
+      Instructions::iconst { value: 5 },
       Instructions::iadd,
       Instructions::dup,
       Instructions::iconst { value: 100 },

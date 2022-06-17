@@ -5,13 +5,18 @@ use crate::parser::{
   cp_info::CpInfo,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Object {}
+type Reference = Option<Rc<RefCell<Type>>>;
 
-type Reference = Option<Rc<RefCell<Object>>>;
-
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Type {
+  //Primitives:
+  Int(i32),
+  Long(i64),
+  Float(f32),
+  Double(f64),
+
+  ReturnAddress(usize),
+
   Reference(Reference),
   ArrayRefI(Option<Rc<RefCell<[i32]>>>),
   ArrayRefL(Option<Rc<RefCell<[i64]>>>),
@@ -19,16 +24,26 @@ pub enum Type {
   ArrayRefD(Option<Rc<RefCell<[f64]>>>),
   ArrayRefA(Option<Rc<RefCell<[Reference]>>>),
   ArrayRefB(Option<Rc<RefCell<[i8]>>>),
-  ArrayRefC(Option<Rc<RefCell<[char]>>>),
+  ArrayRefC(Option<Rc<RefCell<[u16]>>>),
   ArrayRefS(Option<Rc<RefCell<[i16]>>>),
-
-  Int(i32),
-  Long(i64),
-  Float(f32),
-  Double(f64),
 }
 
-struct Frame {}
+macro_rules! get_type {
+  ($variant:ident, $val:expr) => {{
+    let Type::$variant(value) = $val else {
+      panic!("Found value {:?} which is not of type {}", $val, stringify!($variant))
+    };
+    value
+  }};
+}
+
+macro_rules! assert_type {
+  ($variant:ident, $val:expr) => {
+    let Type::$variant(_) = $val else {
+      panic!("Found value {:?} which is not of type {}", $val, stringify!($variant))
+    };
+  };
+}
 
 pub struct JVM {
   pub constant_pool: Vec<CpInfo>,
@@ -70,340 +85,137 @@ impl JVM {
             Instructions::ldc_w { index } => todo!(),
             Instructions::ldc2_w { index } => todo!(),
             Instructions::iload { index } => {
-              let _val = &locals[*index as usize];
-              match _val {
-                Type::Int(val) => stack.push(Type::Int(*val)),
-                _ => panic!("Local variable was not of type Int"),
-              }
+              let val = get_type!(Int, &locals[*index as usize]);
+              stack.push(Type::Int(*val))
             }
             Instructions::lload { index } => {
-              let _val = &locals[*index as usize];
-              match _val {
-                Type::Long(val) => stack.push(Type::Long(*val)),
-                _ => panic!("Local variable was not of type Int"),
-              }
+              let val = get_type!(Long, &locals[*index as usize]);
+              stack.push(Type::Long(*val))
             }
             Instructions::fload { index } => {
-              let _val = &locals[*index as usize];
-              match _val {
-                Type::Float(val) => stack.push(Type::Float(*val)),
-                _ => panic!("Local variable was not of type Int"),
-              }
+              let val = get_type!(Float, &locals[*index as usize]);
+              stack.push(Type::Float(*val))
             }
             Instructions::dload { index } => {
-              let _val = &locals[*index as usize];
-              match _val {
-                Type::Double(val) => stack.push(Type::Double(*val)),
-                _ => panic!("Local variable was not of type Int"),
-              }
+              let val = get_type!(Double, &locals[*index as usize]);
+              stack.push(Type::Double(*val))
             }
             Instructions::aload { index } => {
-              let _val = &locals[*index as usize];
-              match _val {
-                Type::Reference(val) => stack.push(Type::Reference(val.clone())),
-                _ => panic!("Local variable was not of type Int"),
-              }
+              let val = get_type!(Reference, &locals[*index as usize]);
+              stack.push(Type::Reference(val.clone()))
             }
             Instructions::iaload => {
-              let _index = stack.pop().unwrap();
-              match _index {
-                Type::Int(index) => {
-                  let _arrayref = stack.pop().unwrap();
-                  match _arrayref {
-                    Type::ArrayRefI(arrayref) => stack.push(Type::Int(
-                      (*arrayref.expect("NullPointerException")).borrow()[index as usize],
-                    )),
-                    _ => panic!("Value on stack was not of type ArrayRefI"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let index = get_type!(Int, stack.pop().unwrap());
+              let arrayref = get_type!(ArrayRefI, stack.pop().unwrap());
+              stack.push(Type::Int((*arrayref.expect("NullPointerException")).borrow()[index as usize]))
             }
             Instructions::laload => {
-              let _index = stack.pop().unwrap();
-              match _index {
-                Type::Int(index) => {
-                  let _arrayref = stack.pop().unwrap();
-                  match _arrayref {
-                    Type::ArrayRefL(arrayref) => stack.push(Type::Long(
-                      (*arrayref.expect("NullPointerException")).borrow()[index as usize],
-                    )),
-                    _ => panic!("Value on stack was not of type ArrayRefL"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let index = get_type!(Int, stack.pop().unwrap());
+              let arrayref = get_type!(ArrayRefL, stack.pop().unwrap());
+              stack.push(Type::Long((*arrayref.expect("NullPointerException")).borrow()[index as usize]))
             }
             Instructions::faload => {
-              let _index = stack.pop().unwrap();
-              match _index {
-                Type::Int(index) => {
-                  let _arrayref = stack.pop().unwrap();
-                  match _arrayref {
-                    Type::ArrayRefF(arrayref) => stack.push(Type::Float(
-                      (*arrayref.expect("NullPointerException")).borrow()[index as usize],
-                    )),
-                    _ => panic!("Value on stack was not of type ArrayRefF"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let index = get_type!(Int, stack.pop().unwrap());
+              let arrayref = get_type!(ArrayRefF, stack.pop().unwrap());
+              stack.push(Type::Float((*arrayref.expect("NullPointerException")).borrow()[index as usize]))
             }
             Instructions::daload => {
-              let _index = stack.pop().unwrap();
-              match _index {
-                Type::Int(index) => {
-                  let _arrayref = stack.pop().unwrap();
-                  match _arrayref {
-                    Type::ArrayRefD(arrayref) => stack.push(Type::Double(
-                      (*arrayref.expect("NullPointerException")).borrow()[index as usize],
-                    )),
-                    _ => panic!("Value on stack was not of type ArrayRefD"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let index = get_type!(Int, stack.pop().unwrap());
+              let arrayref = get_type!(ArrayRefD, stack.pop().unwrap());
+              stack.push(Type::Double((*arrayref.expect("NullPointerException")).borrow()[index as usize]))
             }
             Instructions::aaload => {
-              let _index = stack.pop().unwrap();
-              match _index {
-                Type::Int(index) => {
-                  let _arrayref = stack.pop().unwrap();
-                  match _arrayref {
-                    Type::ArrayRefA(arrayref) => stack.push(Type::Reference(
-                      (*arrayref.expect("NullPointerException")).borrow()[index as usize].clone(),
-                    )),
-                    _ => panic!("Value on stack was not of type ArrayRefA"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let index = get_type!(Int, stack.pop().unwrap());
+              let arrayref = get_type!(ArrayRefA, stack.pop().unwrap());
+              stack.push(Type::Reference((*arrayref.expect("NullPointerException")).borrow()[index as usize].clone()))
             }
             Instructions::baload => {
-              let _index = stack.pop().unwrap();
-              match _index {
-                Type::Int(index) => {
-                  let _arrayref = stack.pop().unwrap();
-                  match _arrayref {
-                    Type::ArrayRefB(arrayref) => stack.push(Type::Int(
-                      (*arrayref.expect("NullPointerException")).borrow()[index as usize] as i32,
-                    )),
-                    _ => panic!("Value on stack was not of type ArrayRefB"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let index = get_type!(Int, stack.pop().unwrap());
+              let arrayref = get_type!(ArrayRefB, stack.pop().unwrap());
+              stack.push(Type::Int((*arrayref.expect("NullPointerException")).borrow()[index as usize] as i32))
             }
             Instructions::caload => {
-              let _index = stack.pop().unwrap();
-              match _index {
-                Type::Int(index) => {
-                  let _arrayref = stack.pop().unwrap();
-                  match _arrayref {
-                    Type::ArrayRefC(arrayref) => stack.push(Type::Int(
-                      (*arrayref.expect("NullPointerException")).borrow()[index as usize] as i32,
-                    )),
-                    _ => panic!("Value on stack was not of type ArrayRefC"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let index = get_type!(Int, stack.pop().unwrap());
+              let arrayref = get_type!(ArrayRefC, stack.pop().unwrap());
+              stack.push(Type::Int((*arrayref.expect("NullPointerException")).borrow()[index as usize] as u32 as i32))
             }
             Instructions::saload => {
-              let _index = stack.pop().unwrap();
-              match _index {
-                Type::Int(index) => {
-                  let _arrayref = stack.pop().unwrap();
-                  match _arrayref {
-                    Type::ArrayRefS(arrayref) => stack.push(Type::Int(
-                      (*arrayref.expect("NullPointerException")).borrow()[index as usize] as i32,
-                    )),
-                    _ => panic!("Value on stack was not of type ArrayRefS"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let index = get_type!(Int, stack.pop().unwrap());
+              let arrayref = get_type!(ArrayRefS, stack.pop().unwrap());
+              stack.push(Type::Int((*arrayref.expect("NullPointerException")).borrow()[index as usize] as i32))
             }
-            Instructions::istore { index } => locals[*index as usize] = stack.pop().unwrap(),
-            Instructions::lstore { index } => locals[*index as usize] = stack.pop().unwrap(),
-            Instructions::fstore { index } => locals[*index as usize] = stack.pop().unwrap(),
-            Instructions::dstore { index } => locals[*index as usize] = stack.pop().unwrap(),
-            Instructions::astore { index } => locals[*index as usize] = stack.pop().unwrap(),
+            Instructions::istore { index } => {
+              let value = stack.pop().unwrap();
+              assert_type!(Int, value);
+              locals[*index as usize] = value
+            },
+            Instructions::lstore { index } => {
+              let value = stack.pop().unwrap();
+              assert_type!(Long, value);
+              locals[*index as usize] = value
+            },
+            Instructions::fstore { index } => {
+              let value = stack.pop().unwrap();
+              assert_type!(Float, value);
+              locals[*index as usize] = value
+            },
+            Instructions::dstore { index } => {
+              let value = stack.pop().unwrap();
+              assert_type!(Double, value);
+              locals[*index as usize] = value
+            },
+            Instructions::astore { index } => {
+              let value = stack.pop().unwrap();
+              assert_type!(Reference, value);
+              locals[*index as usize] = value
+            },
             Instructions::iastore => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Int(value) => {
-                  let _index = stack.pop().unwrap();
-                  match _index {
-                    Type::Int(index) => {
-                      let _arrayref = stack.pop().unwrap();
-                      match _arrayref {
-                        Type::ArrayRefI(arrayref) => {
-                          (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] =
-                            value
-                        }
-                        _ => panic!("Value on stack was not of type ArrayRefI"),
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value = get_type!(Int, stack.pop().unwrap());
+              let index = get_type!(Int, stack.pop().unwrap());
+              let arrayref = get_type!(ArrayRefI, stack.pop().unwrap());
+              (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] = value
             }
             Instructions::lastore => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Long(value) => {
-                  let _index = stack.pop().unwrap();
-                  match _index {
-                    Type::Int(index) => {
-                      let _arrayref = stack.pop().unwrap();
-                      match _arrayref {
-                        Type::ArrayRefL(arrayref) => {
-                          (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] =
-                            value
-                        }
-                        _ => panic!("Value on stack was not of type ArrayRefL"),
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Long"),
-              }
+              let value = get_type!(Long, stack.pop().unwrap());
+              let index = get_type!(Int, stack.pop().unwrap());
+              let arrayref = get_type!(ArrayRefL, stack.pop().unwrap());
+              (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] = value
             }
             Instructions::fastore => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Float(value) => {
-                  let _index = stack.pop().unwrap();
-                  match _index {
-                    Type::Int(index) => {
-                      let _arrayref = stack.pop().unwrap();
-                      match _arrayref {
-                        Type::ArrayRefF(arrayref) => {
-                          (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] =
-                            value
-                        }
-                        _ => panic!(),
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Float"),
-              }
+              let value = get_type!(Float, stack.pop().unwrap());
+              let index = get_type!(Int, stack.pop().unwrap());
+              let arrayref = get_type!(ArrayRefF, stack.pop().unwrap());
+              (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] = value
             }
             Instructions::dastore => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Double(value) => {
-                  let _index = stack.pop().unwrap();
-                  match _index {
-                    Type::Int(index) => {
-                      let _arrayref = stack.pop().unwrap();
-                      match _arrayref {
-                        Type::ArrayRefD(arrayref) => {
-                          (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] =
-                            value
-                        }
-                        _ => panic!("Value on stack was not of type ArrayRefD"),
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Double"),
-              }
+              let value = get_type!(Double, stack.pop().unwrap());
+              let index = get_type!(Int, stack.pop().unwrap());
+              let arrayref = get_type!(ArrayRefD, stack.pop().unwrap());
+              (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] = value
             }
             Instructions::aastore => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Reference(value) => {
-                  let _index = stack.pop().unwrap();
-                  match _index {
-                    Type::Int(index) => {
-                      let _arrayref = stack.pop().unwrap();
-                      match _arrayref {
-                        Type::ArrayRefA(arrayref) => {
-                          (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] =
-                            value
-                        }
-                        _ => panic!("Value on stack was not of type ArrayRefA"),
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Long"),
-              }
+              let value = get_type!(Reference, stack.pop().unwrap());
+              let index = get_type!(Int, stack.pop().unwrap());
+              let arrayref = get_type!(ArrayRefA, stack.pop().unwrap());
+              (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] = value
             }
             Instructions::bastore => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Int(value) => {
-                  let _index = stack.pop().unwrap();
-                  match _index {
-                    Type::Int(index) => {
-                      let _arrayref = stack.pop().unwrap();
-                      match _arrayref {
-                        Type::ArrayRefB(arrayref) => {
-                          (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] =
-                            value as i8
-                        }
-                        _ => panic!("Value on stack was not of type ArrayRefB"),
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Long"),
-              }
+              let value = get_type!(Int, stack.pop().unwrap());
+              let index = get_type!(Int, stack.pop().unwrap());
+              let arrayref = get_type!(ArrayRefB, stack.pop().unwrap());
+              (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] = value as i8
             }
             Instructions::castore => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Int(value) => {
-                  let _index = stack.pop().unwrap();
-                  match _index {
-                    Type::Int(index) => {
-                      let _arrayref = stack.pop().unwrap();
-                      match _arrayref {
-                        Type::ArrayRefC(arrayref) => {
-                          (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] =
-                            value as u8 as char
-                        }
-                        _ => panic!("Value on stack was not of type ArrayRefC"),
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Long"),
-              }
+              let value = get_type!(Int, stack.pop().unwrap());
+              let index = get_type!(Int, stack.pop().unwrap());
+              let arrayref = get_type!(ArrayRefC, stack.pop().unwrap());
+              (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] = value as u16
             }
             Instructions::sastore => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Int(value) => {
-                  let _index = stack.pop().unwrap();
-                  match _index {
-                    Type::Int(index) => {
-                      let _arrayref = stack.pop().unwrap();
-                      match _arrayref {
-                        Type::ArrayRefS(arrayref) => {
-                          (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] =
-                            value as i16
-                        }
-                        _ => panic!("Value on stack was not of type ArrayRefS"),
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Long"),
-              }
+              let value = get_type!(Int, stack.pop().unwrap());
+              let index = get_type!(Int, stack.pop().unwrap());
+              let arrayref = get_type!(ArrayRefS, stack.pop().unwrap());
+              (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] = value as i16
             }
             Instructions::pop => {
               stack.pop();
@@ -461,632 +273,254 @@ impl JVM {
               stack.swap(len - 1, len - 2)
             }
             Instructions::iadd => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => {
-                      stack.push(Type::Int(value1 + value2));
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value2 = get_type!(Int, stack.pop().unwrap());
+              let value1 = get_type!(Int, stack.last_mut().unwrap());
+              *value1 += value2;
             }
             Instructions::ladd => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Long(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Long(value1) => {
-                      stack.push(Type::Long(value1 + value2));
-                    }
-                    _ => panic!("Value on stack was not of type Long"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Long"),
-              }
+              let value2 = get_type!(Long, stack.pop().unwrap());
+              let value1 = get_type!(Long, stack.last_mut().unwrap());
+              *value1 += value2;
             }
             Instructions::fadd => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Float(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Float(value1) => {
-                      stack.push(Type::Float(value1 + value2));
-                    }
-                    _ => panic!("Value on stack was not of type Float"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Float"),
-              }
+              let value2 = get_type!(Float, stack.pop().unwrap());
+              let value1 = get_type!(Float, stack.last_mut().unwrap());
+              *value1 += value2;
             }
             Instructions::dadd => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Double(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Double(value1) => {
-                      stack.push(Type::Double(value1 + value2));
-                    }
-                    _ => panic!("Value on stack was not of type Double"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Double"),
-              }
+              let value2 = get_type!(Double, stack.pop().unwrap());
+              let value1 = get_type!(Double, stack.last_mut().unwrap());
+              *value1 += value2;
             }
             Instructions::isub => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => {
-                      stack.push(Type::Int(value1 - value2));
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value2 = get_type!(Int, stack.pop().unwrap());
+              let value1 = get_type!(Int, stack.last_mut().unwrap());
+              *value1 -= value2;
             }
             Instructions::lsub => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Long(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Long(value1) => {
-                      stack.push(Type::Long(value1 - value2));
-                    }
-                    _ => panic!("Value on stack was not of type Long"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Long"),
-              }
+              let value2 = get_type!(Long, stack.pop().unwrap());
+              let value1 = get_type!(Long, stack.last_mut().unwrap());
+              *value1 -= value2;
             }
             Instructions::fsub => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Float(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Float(value1) => {
-                      stack.push(Type::Float(value1 - value2));
-                    }
-                    _ => panic!("Value on stack was not of type Float"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Float"),
-              }
+              let value2 = get_type!(Float, stack.pop().unwrap());
+              let value1 = get_type!(Float, stack.last_mut().unwrap());
+              *value1 -= value2;
             }
             Instructions::dsub => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Double(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Double(value1) => {
-                      stack.push(Type::Double(value1 - value2));
-                    }
-                    _ => panic!("Value on stack was not of type Double"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Double"),
-              }
+              let value2 = get_type!(Double, stack.pop().unwrap());
+              let value1 = get_type!(Double, stack.last_mut().unwrap());
+              *value1 -= value2;
             }
             Instructions::imul => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => {
-                      stack.push(Type::Int(value1 * value2));
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value2 = get_type!(Int, stack.pop().unwrap());
+              let value1 = get_type!(Int, stack.last_mut().unwrap());
+              *value1 *= value2;
             }
             Instructions::lmul => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Long(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Long(value1) => {
-                      stack.push(Type::Long(value1 * value2));
-                    }
-                    _ => panic!("Value on stack was not of type Long"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Long"),
-              }
+              let value2 = get_type!(Long, stack.pop().unwrap());
+              let value1 = get_type!(Long, stack.last_mut().unwrap());
+              *value1 *= value2;
             }
             Instructions::fmul => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Float(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Float(value1) => {
-                      stack.push(Type::Float(value1 * value2));
-                    }
-                    _ => panic!("Value on stack was not of type Float"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Float"),
-              }
+              let value2 = get_type!(Float, stack.pop().unwrap());
+              let value1 = get_type!(Float, stack.last_mut().unwrap());
+              *value1 *= value2;
             }
             Instructions::dmul => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Double(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Double(value1) => {
-                      stack.push(Type::Double(value1 * value2));
-                    }
-                    _ => panic!("Value on stack was not of type Double"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Double"),
-              }
+              let value2 = get_type!(Double, stack.pop().unwrap());
+              let value1 = get_type!(Double, stack.last_mut().unwrap());
+              *value1 *= value2;
             }
             Instructions::idiv => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => {
-                      stack.push(Type::Int(value1 / value2));
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value2 = get_type!(Int, stack.pop().unwrap());
+              let value1 = get_type!(Int, stack.last_mut().unwrap());
+              *value1 /= value2;
             }
             Instructions::ldiv => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Long(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Long(value1) => {
-                      stack.push(Type::Long(value1 / value2));
-                    }
-                    _ => panic!("Value on stack was not of type Long"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Long"),
-              }
+              let value2 = get_type!(Long, stack.pop().unwrap());
+              let value1 = get_type!(Long, stack.last_mut().unwrap());
+              *value1 /= value2;
             }
             Instructions::fdiv => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Float(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Float(value1) => {
-                      stack.push(Type::Float(value1 / value2));
-                    }
-                    _ => panic!("Value on stack was not of type Float"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Float"),
-              }
+              let value2 = get_type!(Float, stack.pop().unwrap());
+              let value1 = get_type!(Float, stack.last_mut().unwrap());
+              *value1 /= value2;
             }
             Instructions::ddiv => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Double(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Double(value1) => {
-                      stack.push(Type::Double(value1 / value2));
-                    }
-                    _ => panic!("Value on stack was not of type Double"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Double"),
-              }
+              let value2 = get_type!(Double, stack.pop().unwrap());
+              let value1 = get_type!(Double, stack.last_mut().unwrap());
+              *value1 /= value2;
             }
             Instructions::irem => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => {
-                      stack.push(Type::Int(value1 % value2));
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value2 = get_type!(Int, stack.pop().unwrap());
+              let value1 = get_type!(Int, stack.last_mut().unwrap());
+              *value1 %= value2;
             }
             Instructions::lrem => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Long(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Long(value1) => {
-                      stack.push(Type::Long(value1 % value2));
-                    }
-                    _ => panic!("Value on stack was not of type Long"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Long"),
-              }
+              let value2 = get_type!(Long, stack.pop().unwrap());
+              let value1 = get_type!(Long, stack.last_mut().unwrap());
+              *value1 %= value2;
             }
             Instructions::frem => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Float(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Float(value1) => {
-                      stack.push(Type::Float(value1 % value2));
-                    }
-                    _ => panic!("Value on stack was not of type Float"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Float"),
-              }
+              let value2 = get_type!(Float, stack.pop().unwrap());
+              let value1 = get_type!(Float, stack.last_mut().unwrap());
+              *value1 %= value2;
             }
             Instructions::drem => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Double(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Double(value1) => {
-                      stack.push(Type::Double(value1 % value2));
-                    }
-                    _ => panic!("Value on stack was not of type Double"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Double"),
-              }
+              let value2 = get_type!(Double, stack.pop().unwrap());
+              let value1 = get_type!(Double, stack.last_mut().unwrap());
+              *value1 %= value2;
             }
             Instructions::ineg => {
-              let _val = stack.pop().unwrap();
-              match _val {
-                Type::Int(val) => stack.push(Type::Int(-val)),
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value = get_type!(Int, stack.last_mut().unwrap());
+              *value = -*value;
             }
             Instructions::lneg => {
-              let _val = stack.pop().unwrap();
-              match _val {
-                Type::Long(val) => stack.push(Type::Long(-val)),
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value = get_type!(Long, stack.last_mut().unwrap());
+              *value = -*value;
             }
             Instructions::fneg => {
-              let _val = stack.pop().unwrap();
-              match _val {
-                Type::Float(val) => stack.push(Type::Float(-val)),
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value = get_type!(Float, stack.last_mut().unwrap());
+              *value = -*value;
             }
             Instructions::dneg => {
-              let _val = stack.pop().unwrap();
-              match _val {
-                Type::Double(val) => stack.push(Type::Double(-val)),
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value = get_type!(Double, stack.last_mut().unwrap());
+              *value = -*value;
             }
             Instructions::ishl => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => {
-                      stack.push(Type::Int(value1 << (value2 | 0b11111)));
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let shift = get_type!(Int, stack.pop().unwrap());
+              let value = get_type!(Int, stack.last_mut().unwrap());
+              *value <<= shift | 0b11111
             }
             Instructions::lshl => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Long(value1) => {
-                      stack.push(Type::Long(value1 << (value2 | 0b111111)));
-                    }
-                    _ => panic!("Value on stack was not of type Long"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let shift = get_type!(Int, stack.pop().unwrap());
+              let value = get_type!(Long, stack.last_mut().unwrap());
+              *value <<= shift | 0b111111
             }
             Instructions::ishr => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => {
-                      stack.push(Type::Int(value1 >> (value2 | 0b11111)));
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let shift = get_type!(Int, stack.pop().unwrap());
+              let value = get_type!(Int, stack.last_mut().unwrap());
+              *value >>= shift | 0b11111
             }
             Instructions::lshr => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Long(value1) => {
-                      stack.push(Type::Long(value1 >> (value2 | 0b111111)));
-                    }
-                    _ => panic!("Value on stack was not of type Long"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let shift = get_type!(Int, stack.pop().unwrap());
+              let value = get_type!(Long, stack.last_mut().unwrap());
+              *value >>= shift | 0b111111
             }
             Instructions::iushr => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => {
-                      stack.push(Type::Int((value1 as u32 >> (value2 | 0b11111)) as i32));
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let shift = get_type!(Int, stack.pop().unwrap());
+              let value = get_type!(Int, stack.last_mut().unwrap());
+              *value = (*value as u32 >> (shift | 0b11111)) as i32;
             }
             Instructions::lushr => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Long(value1) => {
-                      stack.push(Type::Long((value1 as u64 >> (value2 | 0b111111)) as i64));
-                    }
-                    _ => panic!("Value on stack was not of type Long"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let shift = get_type!(Int, stack.pop().unwrap());
+              let value = get_type!(Long, stack.last_mut().unwrap());
+              *value = (*value as u64 >> (shift | 0b111111)) as i64;
             }
             Instructions::iand => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => stack.push(Type::Int(value1 & value2)),
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value2 = get_type!(Int, stack.pop().unwrap());
+              let value1 = get_type!(Int, stack.last_mut().unwrap());
+              *value1 &= value2;
             }
             Instructions::land => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Long(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Long(value1) => stack.push(Type::Long(value1 & value2)),
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value2 = get_type!(Long, stack.pop().unwrap());
+              let value1 = get_type!(Long, stack.last_mut().unwrap());
+              *value1 &= value2;
             }
             Instructions::ior => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => stack.push(Type::Int(value1 | value2)),
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value2 = get_type!(Int, stack.pop().unwrap());
+              let value1 = get_type!(Int, stack.last_mut().unwrap());
+              *value1 |= value2;
             }
             Instructions::lor => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Long(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Long(value1) => stack.push(Type::Long(value1 | value2)),
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value2 = get_type!(Long, stack.pop().unwrap());
+              let value1 = get_type!(Long, stack.last_mut().unwrap());
+              *value1 |= value2;
             }
             Instructions::ixor => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => stack.push(Type::Int(value1 ^ value2)),
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value2 = get_type!(Int, stack.pop().unwrap());
+              let value1 = get_type!(Int, stack.last_mut().unwrap());
+              *value1 ^= value2;
             }
             Instructions::lxor => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Long(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Long(value1) => stack.push(Type::Long(value1 ^ value2)),
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value2 = get_type!(Long, stack.pop().unwrap());
+              let value1 = get_type!(Long, stack.last_mut().unwrap());
+              *value1 ^= value2;
             }
             Instructions::iinc { index, r#const } => {
-              let mut _val = &mut locals[*index as usize];
-              match _val {
-                Type::Int(ref mut val) => *val += *r#const as i32,
-                _ => panic!("Local variable was not of type Int"),
-              }
+              let value = get_type!(Int, &mut locals[*index as usize]);
+              *value += *r#const as i32
             }
             Instructions::i2l => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Int(value) => stack.push(Type::Long(value as i64)),
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value = get_type!(Int, stack.pop().unwrap());
+              stack.push(Type::Long(value as i64))
             }
             Instructions::i2f => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Int(value) => stack.push(Type::Float(value as f32)),
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value = get_type!(Int, stack.pop().unwrap());
+              stack.push(Type::Float(value as f32))
             }
             Instructions::i2d => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Int(value) => stack.push(Type::Double(value as f64)),
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value = get_type!(Int, stack.pop().unwrap());
+              stack.push(Type::Double(value as f64))
             }
             Instructions::l2i => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Long(value) => stack.push(Type::Int(value as i32)),
-                _ => panic!("Value on stack was not of type Long"),
-              }
+              let value = get_type!(Long, stack.pop().unwrap());
+              stack.push(Type::Int(value as i32))
             }
             Instructions::l2f => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Long(value) => stack.push(Type::Float(value as f32)),
-                _ => panic!("Value on stack was not of type Long"),
-              }
+              let value = get_type!(Long, stack.pop().unwrap());
+              stack.push(Type::Float(value as f32))
             }
             Instructions::l2d => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Long(value) => stack.push(Type::Double(value as f64)),
-                _ => panic!("Value on stack was not of type Long"),
-              }
+              let value = get_type!(Long, stack.pop().unwrap());
+              stack.push(Type::Double(value as f64))
             }
             Instructions::f2i => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Float(value) => stack.push(Type::Int(value as i32)),
-                _ => panic!("Value on stack was not of type Float"),
-              }
+              let value = get_type!(Float, stack.pop().unwrap());
+              stack.push(Type::Int(value as i32))
             }
             Instructions::f2l => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Float(value) => stack.push(Type::Long(value as i64)),
-                _ => panic!("Value on stack was not of type Float"),
-              }
+              let value = get_type!(Float, stack.pop().unwrap());
+              stack.push(Type::Long(value as i64))
             }
             Instructions::f2d => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Float(value) => stack.push(Type::Double(value as f64)),
-                _ => panic!("Value on stack was not of type Float"),
-              }
+              let value = get_type!(Float, stack.pop().unwrap());
+              stack.push(Type::Double(value as f64))
             }
             Instructions::d2i => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Double(value) => stack.push(Type::Int(value as i32)),
-                _ => panic!("Value on stack was not of type Double"),
-              }
+              let value = get_type!(Double, stack.pop().unwrap());
+              stack.push(Type::Int(value as i32))
             }
             Instructions::d2l => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Double(value) => stack.push(Type::Long(value as i64)),
-                _ => panic!("Value on stack was not of type Double"),
-              }
+              let value = get_type!(Double, stack.pop().unwrap());
+              stack.push(Type::Long(value as i64))
             }
             Instructions::d2f => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Double(value) => stack.push(Type::Float(value as f32)),
-                _ => panic!("Value on stack was not of type Double"),
-              }
+              let value = get_type!(Double, stack.pop().unwrap());
+              stack.push(Type::Float(value as f32))
             }
             Instructions::i2b => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Int(value) => stack.push(Type::Int(value as i8 as i32)),
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value = get_type!(Int, stack.pop().unwrap());
+              stack.push(Type::Int(value as i8 as i32))
             }
             Instructions::i2c => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Int(value) => stack.push(Type::Int(value as u8 as i32)),
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value = get_type!(Int, stack.pop().unwrap());
+              stack.push(Type::Int(value as u8 as i32))
             }
             Instructions::i2s => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Int(value) => stack.push(Type::Int(value as i16 as i32)),
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let value = get_type!(Int, stack.pop().unwrap());
+              stack.push(Type::Int(value as i16 as i32))
             }
             Instructions::lcmp => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Long(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Long(value1) => {
-                      if value1 > value2 {
-                        stack.push(Type::Int(1))
-                      } else if value1 < value2 {
-                        stack.push(Type::Int(-1))
-                      } else {
-                        stack.push(Type::Int(0))
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Long"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Long"),
+              let value2 = get_type!(Long, stack.pop().unwrap());
+              let value1 = get_type!(Long, stack.pop().unwrap());
+              if value1 > value2 {
+                stack.push(Type::Int(1))
+              } else if value1 < value2 {
+                stack.push(Type::Int(-1))
+              } else {
+                stack.push(Type::Int(0))
               }
             }
             Instructions::fcmpl => todo!(),
@@ -1094,210 +528,93 @@ impl JVM {
             Instructions::dcmpl => todo!(),
             Instructions::dcmpg => todo!(),
             Instructions::ifeq { offset } => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Int(value) => {
-                  if value == 0 {
-                    pc = (pc as isize + *offset as isize - 1) as usize; 
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
+              if get_type!(Int, stack.pop().unwrap()) == 0 {
+                pc = (pc as isize + *offset as isize - 1) as usize;
               }
             }
             Instructions::ifne { offset } => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Int(value) => {
-                  if value != 0 {
-                    pc = (pc as isize + *offset as isize - 1) as usize; 
-                  }
-                }
-                _ => panic!("Value on stack was not of type Long"),
+              if get_type!(Int, stack.pop().unwrap()) != 0 {
+                pc = (pc as isize + *offset as isize - 1) as usize;
               }
             }
             Instructions::iflt { offset } => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Int(value) => {
-                  if value < 0 {
-                    pc = (pc as isize + *offset as isize - 1) as usize; 
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
+              if get_type!(Int, stack.pop().unwrap()) < 0 {
+                pc = (pc as isize + *offset as isize - 1) as usize;
               }
             }
             Instructions::ifge { offset } => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Int(value) => {
-                  if value >= 0 {
-                    pc = (pc as isize + *offset as isize - 1) as usize; 
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
+              if get_type!(Int, stack.pop().unwrap()) >= 0 {
+                pc = (pc as isize + *offset as isize - 1) as usize;
               }
             }
             Instructions::ifgt { offset } => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Int(value) => {
-                  if value > 0 {
-                    pc = (pc as isize + *offset as isize - 1) as usize; 
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
+              if get_type!(Int, stack.pop().unwrap()) > 0 {
+                pc = (pc as isize + *offset as isize - 1) as usize;
               }
             }
             Instructions::ifle { offset } => {
-              let _value = stack.pop().unwrap();
-              match _value {
-                Type::Int(value) => {
-                  if value <= 0 {
-                    pc = (pc as isize + *offset as isize - 1) as usize; 
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
+              if get_type!(Int, stack.pop().unwrap()) <= 0 {
+                pc = (pc as isize + *offset as isize - 1) as usize;
               }
             }
             Instructions::if_icmpeq { offset } => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => {
-                      if value1 == value2 {
-                        pc = (pc as isize + *offset as isize - 1) as usize; 
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
+              let value2 = get_type!(Int, stack.pop().unwrap());
+              let value1 = get_type!(Int, stack.pop().unwrap());
+              if value1 == value2 {
+                pc = (pc as isize + *offset as isize - 1) as usize;
               }
             }
             Instructions::if_icmpne { offset } => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => {
-                      if value1 != value2 {
-                        pc = (pc as isize + *offset as isize - 1) as usize; 
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
+              let value2 = get_type!(Int, stack.pop().unwrap());
+              let value1 = get_type!(Int, stack.pop().unwrap());
+              if value1 != value2 {
+                pc = (pc as isize + *offset as isize - 1) as usize;
               }
             }
             Instructions::if_icmplt { offset } => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => {
-                      if value1 < value2 {
-                        pc = (pc as isize + *offset as isize - 1) as usize; 
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
+              let value2 = get_type!(Int, stack.pop().unwrap());
+              let value1 = get_type!(Int, stack.pop().unwrap());
+              if value1 < value2 {
+                pc = (pc as isize + *offset as isize - 1) as usize;
               }
             }
             Instructions::if_icmpge { offset } => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => {
-                      if value1 >= value2 {
-                        pc = (pc as isize + *offset as isize - 1) as usize; 
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
+              let value2 = get_type!(Int, stack.pop().unwrap());
+              let value1 = get_type!(Int, stack.pop().unwrap());
+              if value1 >= value2 {
+                pc = (pc as isize + *offset as isize - 1) as usize;
               }
             }
             Instructions::if_icmpgt { offset } => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => {
-                      if value1 > value2 {
-                        pc = (pc as isize + *offset as isize - 1) as usize; 
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
+              let value2 = get_type!(Int, stack.pop().unwrap());
+              let value1 = get_type!(Int, stack.pop().unwrap());
+              if value1 > value2 {
+                pc = (pc as isize + *offset as isize - 1) as usize;
               }
             }
             Instructions::if_icmple { offset } => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Int(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Int(value1) => {
-                      if value1 <= value2 {
-                        pc = (pc as isize + *offset as isize - 1) as usize; 
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
+              let value2 = get_type!(Int, stack.pop().unwrap());
+              let value1 = get_type!(Int, stack.pop().unwrap());
+              if value1 <= value2 {
+                pc = (pc as isize + *offset as isize - 1) as usize;
               }
             }
             Instructions::if_acmpeq { offset } => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Reference(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Reference(value1) => {
-                      if value1 == value2 {
-                        pc = (pc as isize + *offset as isize - 1) as usize; 
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
+              let value2 = get_type!(Reference, stack.pop().unwrap());
+              let value1 = get_type!(Reference, stack.pop().unwrap());
+              if value1 == value2 {
+                pc = (pc as isize + *offset as isize - 1) as usize;
               }
             }
             Instructions::if_acmpne { offset } => {
-              let _value2 = stack.pop().unwrap();
-              match _value2 {
-                Type::Reference(value2) => {
-                  let _value1 = stack.pop().unwrap();
-                  match _value1 {
-                    Type::Reference(value1) => {
-                      if value1 != value2 {
-                        pc = (pc as isize + *offset as isize - 1) as usize; 
-                      }
-                    }
-                    _ => panic!("Value on stack was not of type Int"),
-                  }
-                }
-                _ => panic!("Value on stack was not of type Int"),
+              let value2 = get_type!(Reference, stack.pop().unwrap());
+              let value1 = get_type!(Reference, stack.pop().unwrap());
+              if value1 != value2 {
+                pc = (pc as isize + *offset as isize - 1) as usize;
               }
             }
             Instructions::goto { offset } => {
-              println!("aaa {}", *offset);
-              pc = (pc as isize + *offset as isize - 1) as usize; 
+              pc = (pc as isize + *offset as isize - 1) as usize;
             },
             Instructions::jsr { offset } => todo!(),
             Instructions::ret { index } => todo!(),
@@ -1313,39 +630,29 @@ impl JVM {
               pairs,
             } => todo!(),
             Instructions::ireturn => {
-              let value = stack.pop().unwrap();
-              match value {
-                Type::Int(_) => return Some(value),
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let val = stack.pop().unwrap();
+              assert_type!(Int, val);
+              return Some(val);
             }
             Instructions::lreturn => {
-              let value = stack.pop().unwrap();
-              match value {
-                Type::Long(_) => return Some(value),
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let val = stack.pop().unwrap();
+              assert_type!(Long, val);
+              return Some(val);
             }
             Instructions::freturn => {
-              let value = stack.pop().unwrap();
-              match value {
-                Type::Float(_) => return Some(value),
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let val = stack.pop().unwrap();
+              assert_type!(Float, val);
+              return Some(val);
             }
             Instructions::dreturn => {
-              let value = stack.pop().unwrap();
-              match value {
-                Type::Double(_) => return Some(value),
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let val = stack.pop().unwrap();
+              assert_type!(Double, val);
+              return Some(val);
             }
             Instructions::areturn => {
-              let value = stack.pop().unwrap();
-              match value {
-                Type::Reference(_) => return Some(value),
-                _ => panic!("Value on stack was not of type Int"),
-              }
+              let val = stack.pop().unwrap();
+              assert_type!(Reference, val);
+              return Some(val);
             }
             Instructions::r#return => return None,
             Instructions::getstatic { index } => todo!(),

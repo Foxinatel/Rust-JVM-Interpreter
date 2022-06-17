@@ -1,4 +1,4 @@
-use crate::helpers::get_u16;
+use crate::stream_reader::StreamReader;
 
 #[derive(Debug)]
 pub struct Classes {
@@ -9,12 +9,12 @@ pub struct Classes {
 }
 
 impl Classes {
-  pub fn read(buf: &mut &[u8]) -> Self {
+  pub fn read(sr: &mut StreamReader) -> Self {
     Classes {
-      inner_class_info_index: get_u16(buf),
-      outer_class_info_index: get_u16(buf),
-      inner_name_index: get_u16(buf),
-      inner_class_access_flags: get_u16(buf),
+      inner_class_info_index: sr.get_u16(),
+      outer_class_info_index: sr.get_u16(),
+      inner_name_index: sr.get_u16(),
+      inner_class_access_flags: sr.get_u16(),
     }
   }
 }

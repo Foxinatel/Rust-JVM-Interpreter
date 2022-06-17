@@ -1,4 +1,4 @@
-use crate::helpers::{get_u16, get_u8};
+use crate::stream_reader::StreamReader;
 
 #[derive(Debug)]
 pub enum VerificationTypeInfo {
@@ -14,8 +14,8 @@ pub enum VerificationTypeInfo {
 }
 
 impl VerificationTypeInfo {
-  pub fn read(buf: &mut &[u8]) -> Self {
-    let tag = get_u8(buf);
+  pub fn read(sr: &mut StreamReader) -> Self {
+    let tag = sr.get_u8();
     match tag {
       0 => VerificationTypeInfo::TopVariable { tag },
       1 => VerificationTypeInfo::IntegerVariable { tag },
@@ -26,11 +26,11 @@ impl VerificationTypeInfo {
       6 => VerificationTypeInfo::UninitializedThisVariable { tag },
       7 => VerificationTypeInfo::ObjectVariable {
         tag,
-        cpool_index: get_u16(buf),
+        cpool_index: sr.get_u16(),
       },
       8 => VerificationTypeInfo::UninitializedVariable {
         tag,
-        offset: get_u16(buf),
+        offset: sr.get_u16(),
       },
       _ => panic!("Invalid VarificationTypeInfo"),
     }

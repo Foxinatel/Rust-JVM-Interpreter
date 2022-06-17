@@ -1,9 +1,9 @@
-use crate::helpers::take_n;
+use crate::stream_reader::StreamReader;
 
 use super::attribute::ATTRIBUTE;
 
-pub fn read(buf: &mut &[u8], attribute_length: u32) -> ATTRIBUTE {
+pub fn read(sr: &mut StreamReader, attribute_length: u32) -> ATTRIBUTE {
   ATTRIBUTE::SourceDebugExtension {
-    debug_extension: take_n(attribute_length as usize, buf),
+    debug_extension: sr.take_n(attribute_length as usize),
   }
 }
