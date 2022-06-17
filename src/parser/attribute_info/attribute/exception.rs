@@ -14,7 +14,7 @@ impl Exception {
       start_pc: get_u16(buf),
       end_pc: get_u16(buf),
       handler_pc: get_u16(buf),
-      catch_type: get_u16(buf)
-    }
+      catch_type: get_u16(buf),
+    };
   }
 }

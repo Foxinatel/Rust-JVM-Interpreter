@@ -1,7 +1,13 @@
 use self::code_generator::generate_instructions;
 
-use super::{attribute::{ATTRIBUTE, exception::Exception}, AttributeInfo};
-use crate::{parser::cp_info::CpInfo, helpers::{get_u16, get_u32}};
+use super::{
+  attribute::{exception::Exception, ATTRIBUTE},
+  AttributeInfo,
+};
+use crate::{
+  helpers::{get_u16, get_u32},
+  parser::cp_info::CpInfo,
+};
 
 pub mod code_generator;
 
@@ -12,13 +18,13 @@ pub fn read(buf: &mut &[u8], constant_pool: &Vec<CpInfo>) -> ATTRIBUTE {
   let raw_code = buf.take(..(code_length as usize)).unwrap();
   let code = generate_instructions(&mut &raw_code[..]);
   let exception_table_length = get_u16(buf);
-  let exception_table: Vec<Exception> = (0..exception_table_length).map(|_|
-      Exception::read(buf)
-  ).collect();
-  let attributes_count =  get_u16(buf);
-  let attributes: Vec<AttributeInfo> = (0..attributes_count).map(|_|
-      AttributeInfo::read(buf, constant_pool)
-  ).collect();
+  let exception_table: Vec<Exception> = (0..exception_table_length)
+    .map(|_| Exception::read(buf))
+    .collect();
+  let attributes_count = get_u16(buf);
+  let attributes: Vec<AttributeInfo> = (0..attributes_count)
+    .map(|_| AttributeInfo::read(buf, constant_pool))
+    .collect();
 
   ATTRIBUTE::Code {
     max_stack,
@@ -28,6 +34,6 @@ pub fn read(buf: &mut &[u8], constant_pool: &Vec<CpInfo>) -> ATTRIBUTE {
     exception_table_length,
     exception_table,
     attributes_count,
-    attributes
+    attributes,
   }
 }

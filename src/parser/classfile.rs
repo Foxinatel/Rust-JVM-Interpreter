@@ -1,10 +1,7 @@
 use crate::helpers::get_u16;
 
 use super::{
-  cp_info::CpInfo,
-  field_info::FieldInfo,
-  method_info::MethodInfo,
-  attribute_info::AttributeInfo,
+  attribute_info::AttributeInfo, cp_info::CpInfo, field_info::FieldInfo, method_info::MethodInfo,
 };
 
 #[derive(Debug)]
@@ -21,39 +18,39 @@ pub struct ClassFile {
   pub fields_count: u16,
   pub fields: Vec<FieldInfo>, //field_info fields[fields_count];
   pub methods_count: u16,
-  pub methods: Vec<MethodInfo>,//method_info methods[methods_count];
+  pub methods: Vec<MethodInfo>, //method_info methods[methods_count];
   pub attributes_count: u16,
-  pub attributes: Vec<AttributeInfo>//attribute_info attributes[attributes_count];
+  pub attributes: Vec<AttributeInfo>, //attribute_info attributes[attributes_count];
 }
 
 impl ClassFile {
   pub fn read(buf: &mut &[u8]) -> Self {
-    *buf = buf.strip_prefix(&[0xca, 0xfe, 0xba, 0xbe]).expect("File has invalid header");
+    *buf = buf
+      .strip_prefix(&[0xca, 0xfe, 0xba, 0xbe])
+      .expect("File has invalid header");
     let minor_version = get_u16(buf);
     let major_version = get_u16(buf);
     let constant_pool_count = get_u16(buf);
-    let constant_pool: Vec<CpInfo> = (1..constant_pool_count).map(|_| {
-        CpInfo::read(buf)
-    }).collect();
+    let constant_pool: Vec<CpInfo> = (1..constant_pool_count)
+      .map(|_| CpInfo::read(buf))
+      .collect();
     let access_flags = get_u16(buf);
     let this_class = get_u16(buf);
     let super_class = get_u16(buf);
     let interfaces_count = get_u16(buf);
-    let interfaces: Vec<u16> = (0..interfaces_count).map(|_|
-        get_u16(buf)
-    ).collect();
+    let interfaces: Vec<u16> = (0..interfaces_count).map(|_| get_u16(buf)).collect();
     let fields_count = get_u16(buf);
-    let fields: Vec<FieldInfo> = (0..fields_count).map(|_|
-        FieldInfo::read(buf, &constant_pool)
-    ).collect();
+    let fields: Vec<FieldInfo> = (0..fields_count)
+      .map(|_| FieldInfo::read(buf, &constant_pool))
+      .collect();
     let methods_count = get_u16(buf);
-    let methods: Vec<MethodInfo> = (0..methods_count).map(|_|
-        MethodInfo::read(buf, &constant_pool)
-    ).collect();
+    let methods: Vec<MethodInfo> = (0..methods_count)
+      .map(|_| MethodInfo::read(buf, &constant_pool))
+      .collect();
     let attributes_count = get_u16(buf);
-    let attributes: Vec<AttributeInfo> = (0..attributes_count).map(|_|
-        AttributeInfo::read(buf, &constant_pool)
-    ).collect();
+    let attributes: Vec<AttributeInfo> = (0..attributes_count)
+      .map(|_| AttributeInfo::read(buf, &constant_pool))
+      .collect();
 
     return Self {
       minor_version,
@@ -70,7 +67,7 @@ impl ClassFile {
       methods_count,
       methods,
       attributes_count,
-      attributes
-    }
+      attributes,
+    };
   }
 }

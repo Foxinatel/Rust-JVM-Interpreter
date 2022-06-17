@@ -6,7 +6,7 @@ pub struct LocalVariableType {
   pub length: u16,
   pub name_index: u16,
   pub signature_index: u16,
-  pub index: u16
+  pub index: u16,
 }
 
 impl LocalVariableType {
@@ -16,7 +16,7 @@ impl LocalVariableType {
       length: get_u16(buf),
       name_index: get_u16(buf),
       signature_index: get_u16(buf),
-      index: get_u16(buf)
+      index: get_u16(buf),
     }
   }
 }

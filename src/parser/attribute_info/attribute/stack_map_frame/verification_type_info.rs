@@ -1,16 +1,16 @@
-use crate::helpers::{get_u8, get_u16};
+use crate::helpers::{get_u16, get_u8};
 
 #[derive(Debug)]
 pub enum VerificationTypeInfo {
-  TopVariable {tag: u8},
-  IntegerVariable {tag: u8},
-  FloatVariable {tag: u8},
-  LongVariable {tag: u8},
-  DoubleVariable{tag: u8},
-  NullVariable {tag: u8},
-  UninitializedThisVariable {tag: u8},
-  ObjectVariable {tag: u8, cpool_index: u16},
-  UninitializedVariable {tag: u8, offset: u16},
+  TopVariable { tag: u8 },
+  IntegerVariable { tag: u8 },
+  FloatVariable { tag: u8 },
+  LongVariable { tag: u8 },
+  DoubleVariable { tag: u8 },
+  NullVariable { tag: u8 },
+  UninitializedThisVariable { tag: u8 },
+  ObjectVariable { tag: u8, cpool_index: u16 },
+  UninitializedVariable { tag: u8, offset: u16 },
 }
 
 impl VerificationTypeInfo {
@@ -24,9 +24,15 @@ impl VerificationTypeInfo {
       4 => VerificationTypeInfo::LongVariable { tag },
       5 => VerificationTypeInfo::NullVariable { tag },
       6 => VerificationTypeInfo::UninitializedThisVariable { tag },
-      7 => VerificationTypeInfo::ObjectVariable { tag, cpool_index: get_u16(buf) },
-      8 => VerificationTypeInfo::UninitializedVariable { tag, offset: get_u16(buf) },
-      _ => panic!("Invalid VarificationTypeInfo")
+      7 => VerificationTypeInfo::ObjectVariable {
+        tag,
+        cpool_index: get_u16(buf),
+      },
+      8 => VerificationTypeInfo::UninitializedVariable {
+        tag,
+        offset: get_u16(buf),
+      },
+      _ => panic!("Invalid VarificationTypeInfo"),
     }
   }
 }
