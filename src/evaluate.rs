@@ -239,14 +239,14 @@ impl JVM {
               match value3_opt {
                 Some(value3) => {
                   stack.push(value1.clone());
-                  stack.push(value3.clone());
-                  stack.push(value2.clone());
-                  stack.push(value1.clone());
+                  stack.push(value3);
+                  stack.push(value2);
+                  stack.push(value1);
                 }
                 None => {
                   stack.push(value1.clone());
-                  stack.push(value2.clone());
-                  stack.push(value1.clone());
+                  stack.push(value2);
+                  stack.push(value1);
                 }
               }
             }
@@ -257,12 +257,12 @@ impl JVM {
                 Some(value2) => {
                   stack.push(value2.clone());
                   stack.push(value1.clone());
-                  stack.push(value2.clone());
-                  stack.push(value1.clone());
+                  stack.push(value2);
+                  stack.push(value1);
                 }
                 None => {
                   stack.push(value1.clone());
-                  stack.push(value1.clone());
+                  stack.push(value1);
                 }
               }
             }
