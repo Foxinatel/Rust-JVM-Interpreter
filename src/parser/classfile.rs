@@ -1,3 +1,5 @@
+use std::{collections::HashMap, fs};
+
 use crate::stream_reader::StreamReader;
 
 use super::{
@@ -18,13 +20,17 @@ pub struct ClassFile {
   pub fields_count: u16,
   pub fields: Vec<FieldInfo>, //field_info fields[fields_count];
   pub methods_count: u16,
-  pub methods: Vec<MethodInfo>, //method_info methods[methods_count];
+  pub methods: HashMap<String, MethodInfo>, //method_info methods[methods_count];
   pub attributes_count: u16,
   pub attributes: Vec<AttributeInfo>, //attribute_info attributes[attributes_count];
 }
 
 impl ClassFile {
-  pub fn read(sr: &mut StreamReader) -> Self {
+  pub fn read(path: String) -> (String,Self) {
+    let buf = fs::read(path.clone()).or(fs::read(path.clone() + ".class")).expect(
+      format!("Could not find a file at {0} or {0}.class", path).as_str()
+    );
+    let mut sr = &mut StreamReader::from(buf);
     sr.stream = sr.stream
       .strip_prefix(&[0xca, 0xfe, 0xba, 0xbe])
       .expect("File has invalid header").to_vec();
@@ -44,7 +50,7 @@ impl ClassFile {
       .map(|_| FieldInfo::read(sr, &constant_pool))
       .collect();
     let methods_count = sr.get_u16();
-    let methods: Vec<MethodInfo> = (0..methods_count)
+    let methods: HashMap<String, MethodInfo> = (0..methods_count)
       .map(|_| MethodInfo::read(sr, &constant_pool))
       .collect();
     let attributes_count = sr.get_u16();
@@ -53,7 +59,10 @@ impl ClassFile {
       .collect();
     if !sr.done() {panic!("Extra bytes were found at the end of the classfile")}
 
-    return Self {
+    let CpInfo::Class { tag:_, name_index } = &constant_pool[this_class as usize - 1] else {panic!()};
+    let CpInfo::Utf8 { tag: _, length: _, bytes: name } = &constant_pool[*name_index as usize - 1] else {panic!()};
+
+    (name.to_string(), Self {
       minor_version,
       major_version,
       constant_pool_count,
@@ -69,6 +78,6 @@ impl ClassFile {
       methods,
       attributes_count,
       attributes,
-    };
+    })
   }
 }

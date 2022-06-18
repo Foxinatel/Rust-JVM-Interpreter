@@ -1,9 +1,10 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc, collections::HashMap, path::Path, env};
 
 use crate::parser::{
-  attribute_info::{attribute::ATTRIBUTE, code::code_generator::Instructions},
-  cp_info::CpInfo,
+  attribute_info::{attribute::ATTRIBUTE, code::code_generator::Instructions}, classfile::ClassFile,
 };
+
+use self::resolver::Resolver;
 
 type Reference = Option<Rc<RefCell<Type>>>;
 
@@ -45,12 +46,23 @@ macro_rules! assert_type {
   };
 }
 
+mod resolver;
+
+#[derive(Debug)]
 pub struct JVM {
-  pub constant_pool: Vec<CpInfo>,
+  pub classes: HashMap<String, ClassFile>
 }
 
 impl JVM {
-  pub fn evaluate(&self, code: ATTRIBUTE) -> Option<Type> {
+  pub fn from_path(path: String) -> Self {
+    env::set_current_dir(Path::new(&path).parent().unwrap()).unwrap();
+    let newpath = String::from(Path::new(&path).file_name().unwrap().to_str().unwrap());
+    let mut resolver = Resolver::new();
+    resolver.resolve(ClassFile::read(newpath));
+    Self { classes: resolver.resolved }
+  }
+
+  fn evaluate(&self, code: ATTRIBUTE) -> Option<Type> {
     match code {
       ATTRIBUTE::Code {
         max_stack,
@@ -77,7 +89,7 @@ impl JVM {
             Instructions::bipush { value } => stack.push(Type::Int(*value as i32)),
             Instructions::sipush { value } => stack.push(Type::Int(*value as i32)),
             Instructions::ldc { index } => {
-              let constval = &self.constant_pool[*index as usize];
+              // let constval = &self.constant_pool[*index as usize];
               // match constval {
 
               // }
