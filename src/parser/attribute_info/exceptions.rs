@@ -1,6 +1,5 @@
-use crate::stream_reader::StreamReader;
-
 use super::attribute::ATTRIBUTE;
+use crate::stream_reader::StreamReader;
 
 pub fn read(sr: &mut StreamReader) -> ATTRIBUTE {
   let number_of_exceptions = sr.get_u16();
@@ -8,6 +7,6 @@ pub fn read(sr: &mut StreamReader) -> ATTRIBUTE {
 
   ATTRIBUTE::Exceptions {
     number_of_exceptions,
-    exception_index_table,
+    exception_index_table
   }
 }

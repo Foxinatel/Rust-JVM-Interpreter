@@ -6,7 +6,7 @@ pub struct LocalVariable {
   pub length: u16,
   pub name_index: u16,
   pub descriptor_index: u16,
-  pub index: u16,
+  pub index: u16
 }
 
 impl LocalVariable {
@@ -16,7 +16,7 @@ impl LocalVariable {
       length: sr.get_u16(),
       name_index: sr.get_u16(),
       descriptor_index: sr.get_u16(),
-      index: sr.get_u16(),
+      index: sr.get_u16()
     }
   }
 }

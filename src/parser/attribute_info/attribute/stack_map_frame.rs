@@ -1,35 +1,34 @@
-use crate::stream_reader::StreamReader;
-
 use self::verification_type_info::VerificationTypeInfo;
+use crate::stream_reader::StreamReader;
 
 mod verification_type_info;
 
 #[derive(Debug)]
 pub enum StackMapFrame {
   SameFrame {
-    frame_type: u8,
+    frame_type: u8
   },
   SameLocals1StackItemFrame {
     frame_type: u8,
-    stack: [VerificationTypeInfo; 1],
+    stack: [VerificationTypeInfo; 1]
   },
   SameLocals1StackItemFrameExtended {
     frame_type: u8,
     offset_delta: u16,
-    stack: [VerificationTypeInfo; 1],
+    stack: [VerificationTypeInfo; 1]
   },
   ChopFrame {
     frame_type: u8,
-    offset_delta: u16,
+    offset_delta: u16
   },
   SameFrameExtended {
     frame_type: u8,
-    offset_delta: u16,
+    offset_delta: u16
   },
   AppendFrame {
     frame_type: u8,
     offset_delta: u16,
-    locals: Vec<VerificationTypeInfo>,
+    locals: Vec<VerificationTypeInfo>
   },
   FullFrame {
     frame_type: u8,
@@ -37,8 +36,8 @@ pub enum StackMapFrame {
     number_of_locals: u16,
     locals: Vec<VerificationTypeInfo>,
     number_of_stack_items: u16,
-    stack: Vec<VerificationTypeInfo>,
-  },
+    stack: Vec<VerificationTypeInfo>
+  }
 }
 
 impl StackMapFrame {
@@ -48,20 +47,20 @@ impl StackMapFrame {
       (0..=63) => StackMapFrame::SameFrame { frame_type },
       (64..=127) => StackMapFrame::SameLocals1StackItemFrame {
         frame_type,
-        stack: [VerificationTypeInfo::read(sr)],
+        stack: [VerificationTypeInfo::read(sr)]
       },
       247 => StackMapFrame::SameLocals1StackItemFrameExtended {
         frame_type,
         offset_delta: sr.get_u16(),
-        stack: [VerificationTypeInfo::read(sr)],
+        stack: [VerificationTypeInfo::read(sr)]
       },
       (248..=250) => StackMapFrame::ChopFrame {
         frame_type,
-        offset_delta: sr.get_u16(),
+        offset_delta: sr.get_u16()
       },
       251 => StackMapFrame::SameFrameExtended {
         frame_type,
-        offset_delta: sr.get_u16(),
+        offset_delta: sr.get_u16()
       },
       (252..=254) => {
         let offset_delta = sr.get_u16();
@@ -71,7 +70,7 @@ impl StackMapFrame {
         StackMapFrame::AppendFrame {
           frame_type,
           offset_delta,
-          locals,
+          locals
         }
       }
       255 => {
@@ -90,10 +89,10 @@ impl StackMapFrame {
           number_of_locals,
           locals,
           number_of_stack_items,
-          stack,
+          stack
         }
       }
-      _ => panic!("This tag is reserved for future use"),
+      _ => panic!("This tag is reserved for future use")
     }
   }
 }

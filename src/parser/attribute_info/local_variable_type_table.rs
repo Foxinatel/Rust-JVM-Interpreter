@@ -1,6 +1,5 @@
-use crate::stream_reader::StreamReader;
-
 use super::attribute::{local_variable_type::LocalVariableType, ATTRIBUTE};
+use crate::stream_reader::StreamReader;
 
 pub fn read(sr: &mut StreamReader) -> ATTRIBUTE {
   let local_variable_type_table_length = sr.get_u16();
@@ -10,6 +9,6 @@ pub fn read(sr: &mut StreamReader) -> ATTRIBUTE {
 
   ATTRIBUTE::LocalVariableTypeTable {
     local_variable_type_table_length,
-    local_variable_type_table,
+    local_variable_type_table
   }
 }

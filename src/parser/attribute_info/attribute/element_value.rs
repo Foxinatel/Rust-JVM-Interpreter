@@ -1,26 +1,25 @@
-use crate::stream_reader::StreamReader;
-
 use super::Annotation;
+use crate::stream_reader::StreamReader;
 
 #[derive(Debug)]
 pub enum ElementValues {
   ConstValueIndex(u16),
   EnumConstValue {
     type_name_index: u16,
-    const_name_index: u16,
+    const_name_index: u16
   },
   ClassInfoIndex(u16),
   AnnotationValue(Annotation),
   ArrayValue {
     num_values: u16,
-    values: Vec<ElementValue>,
-  },
+    values: Vec<ElementValue>
+  }
 }
 
 #[derive(Debug)]
 pub struct ElementValue {
   pub tag: u8,
-  pub value: ElementValues,
+  pub value: ElementValues
 }
 
 impl ElementValue {
@@ -32,7 +31,7 @@ impl ElementValue {
       }
       'e' => ElementValues::EnumConstValue {
         type_name_index: sr.get_u16(),
-        const_name_index: sr.get_u16(),
+        const_name_index: sr.get_u16()
       },
       'c' => ElementValues::ClassInfoIndex(sr.get_u16()),
       '@' => ElementValues::AnnotationValue(Annotation::read(sr)),
@@ -41,7 +40,7 @@ impl ElementValue {
         let values: Vec<ElementValue> = (0..num_values).map(|_| ElementValue::read(sr)).collect();
         ElementValues::ArrayValue { num_values, values }
       }
-      _ => panic!(),
+      _ => panic!()
     };
     ElementValue { tag, value }
   }

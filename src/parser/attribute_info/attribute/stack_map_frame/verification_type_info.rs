@@ -10,7 +10,7 @@ pub enum VerificationTypeInfo {
   NullVariable { tag: u8 },
   UninitializedThisVariable { tag: u8 },
   ObjectVariable { tag: u8, cpool_index: u16 },
-  UninitializedVariable { tag: u8, offset: u16 },
+  UninitializedVariable { tag: u8, offset: u16 }
 }
 
 impl VerificationTypeInfo {
@@ -26,13 +26,13 @@ impl VerificationTypeInfo {
       6 => VerificationTypeInfo::UninitializedThisVariable { tag },
       7 => VerificationTypeInfo::ObjectVariable {
         tag,
-        cpool_index: sr.get_u16(),
+        cpool_index: sr.get_u16()
       },
       8 => VerificationTypeInfo::UninitializedVariable {
         tag,
-        offset: sr.get_u16(),
+        offset: sr.get_u16()
       },
-      _ => panic!("Invalid VarificationTypeInfo"),
+      _ => panic!("Invalid VarificationTypeInfo")
     }
   }
 }

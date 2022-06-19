@@ -22,20 +22,26 @@ pub fn clean(mut initial: Vec<(usize, Instructions)>) -> Vec<Instructions> {
       | Instructions::jsr { ref mut offset }
       | Instructions::ifnull { ref mut offset }
       | Instructions::ifnonnull { ref mut offset } => {
-        let (index2, _) = newvec.iter().enumerate().find(
-          |(_, (pos2, _))| {*pos2 == (*pos1 as isize + *offset as isize) as usize}
-        ).expect("Jump instruction gave an invalid ref mut offset");
+        let (index2, _) = newvec
+          .iter()
+          .enumerate()
+          .find(|(_, (pos2, _))| *pos2 == (*pos1 as isize + *offset as isize) as usize)
+          .expect("Jump instruction gave an invalid ref mut offset");
         *offset = (index2 as isize - index1 as isize) as i16;
       }
-      Instructions::goto_w { ref mut offset }
-      | Instructions::jsr_w { ref mut offset } => {
-        let (index2, _) = newvec.iter().enumerate().find(
-          |(_, (pos2, _))| {*pos2 == (*pos1 as isize + *offset as isize) as usize}
-        ).expect("Jump instruction gave an invalid ref mut offset");
+      Instructions::goto_w { ref mut offset } | Instructions::jsr_w { ref mut offset } => {
+        let (index2, _) = newvec
+          .iter()
+          .enumerate()
+          .find(|(_, (pos2, _))| *pos2 == (*pos1 as isize + *offset as isize) as usize)
+          .expect("Jump instruction gave an invalid ref mut offset");
         *offset = (index2 - index1) as i32;
       }
       _ => {}
     }
   }
-  initial.iter().map(|val| val.1.clone()).collect::<Vec<Instructions>>()
+  initial
+    .iter()
+    .map(|val| val.1.clone())
+    .collect::<Vec<Instructions>>()
 }

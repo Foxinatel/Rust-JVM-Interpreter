@@ -1,16 +1,12 @@
-use self::{code_generator::generate_instructions, clean_jumps::clean};
-
+use self::{clean_jumps::clean, code_generator::generate_instructions};
 use super::{
   attribute::{exception::Exception, ATTRIBUTE},
-  AttributeInfo,
+  AttributeInfo
 };
-use crate::{
-  parser::cp_info::CpInfo,
-  stream_reader::StreamReader,
-};
+use crate::{parser::cp_info::CpInfo, stream_reader::StreamReader};
 
-pub mod code_generator;
 pub mod clean_jumps;
+pub mod code_generator;
 
 pub fn read(sr: &mut StreamReader, constant_pool: &Vec<CpInfo>) -> ATTRIBUTE {
   let max_stack = sr.get_u16();
@@ -36,6 +32,6 @@ pub fn read(sr: &mut StreamReader, constant_pool: &Vec<CpInfo>) -> ATTRIBUTE {
     exception_table_length,
     exception_table,
     attributes_count,
-    attributes,
+    attributes
   }
 }

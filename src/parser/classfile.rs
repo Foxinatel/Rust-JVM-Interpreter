@@ -1,10 +1,12 @@
 use std::{collections::HashMap, fs};
 
-use crate::stream_reader::StreamReader;
-
 use super::{
-  attribute_info::AttributeInfo, cp_info::CpInfo, field_info::FieldInfo, method_info::MethodInfo,
+  attribute_info::AttributeInfo,
+  cp_info::CpInfo,
+  field_info::FieldInfo,
+  method_info::MethodInfo
 };
+use crate::stream_reader::StreamReader;
 
 #[derive(Debug)]
 pub struct ClassFile {
@@ -22,24 +24,24 @@ pub struct ClassFile {
   pub methods_count: u16,
   pub methods: HashMap<String, MethodInfo>, //method_info methods[methods_count];
   pub attributes_count: u16,
-  pub attributes: Vec<AttributeInfo>, //attribute_info attributes[attributes_count];
+  pub attributes: Vec<AttributeInfo> //attribute_info attributes[attributes_count];
 }
 
 impl ClassFile {
-  pub fn read(path: String) -> (String,Self) {
-    let buf = fs::read(path.clone()).or(fs::read(path.clone() + ".class")).expect(
-      format!("Could not find a file at {0} or {0}.class", path).as_str()
-    );
+  pub fn read(path: String) -> (String, Self) {
+    let buf = fs::read(path.clone())
+      .or(fs::read(path.clone() + ".class"))
+      .expect(format!("Could not find a file at {0} or {0}.class", path).as_str());
     let mut sr = &mut StreamReader::from(buf);
-    sr.stream = sr.stream
+    sr.stream = sr
+      .stream
       .strip_prefix(&[0xca, 0xfe, 0xba, 0xbe])
-      .expect("File has invalid header").to_vec();
+      .expect("File has invalid header")
+      .to_vec();
     let minor_version = sr.get_u16();
     let major_version = sr.get_u16();
     let constant_pool_count = sr.get_u16();
-    let constant_pool: Vec<CpInfo> = (1..constant_pool_count)
-      .map(|_| CpInfo::read(sr))
-      .collect();
+    let constant_pool: Vec<CpInfo> = (1..constant_pool_count).map(|_| CpInfo::read(sr)).collect();
     let access_flags = sr.get_u16();
     let this_class = sr.get_u16();
     let super_class = sr.get_u16();
@@ -57,7 +59,9 @@ impl ClassFile {
     let attributes: Vec<AttributeInfo> = (0..attributes_count)
       .map(|_| AttributeInfo::read(sr, &constant_pool))
       .collect();
-    if !sr.done() {panic!("Extra bytes were found at the end of the classfile")}
+    if !sr.done() {
+      panic!("Extra bytes were found at the end of the classfile")
+    }
 
     let CpInfo::Class { tag:_, name_index } = &constant_pool[this_class as usize - 1] else {panic!()};
     let CpInfo::Utf8 { tag: _, length: _, bytes: name } = &constant_pool[*name_index as usize - 1] else {panic!()};
@@ -77,7 +81,7 @@ impl ClassFile {
       methods_count,
       methods,
       attributes_count,
-      attributes,
+      attributes
     })
   }
 }

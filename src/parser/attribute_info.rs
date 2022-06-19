@@ -1,8 +1,6 @@
-use crate::stream_reader::StreamReader;
-
 use self::attribute::ATTRIBUTE;
-
 use super::cp_info::CpInfo;
+use crate::stream_reader::StreamReader;
 
 pub mod annotation_default;
 pub mod attribute;
@@ -26,7 +24,7 @@ pub mod stack_map_table;
 pub struct AttributeInfo {
   pub attribute_name_index: u16,
   pub attribute_length: u32,
-  pub attribute: ATTRIBUTE,
+  pub attribute: ATTRIBUTE
 }
 
 impl AttributeInfo {
@@ -37,7 +35,7 @@ impl AttributeInfo {
       CpInfo::Utf8 {
         tag: _,
         length: _,
-        bytes,
+        bytes
       } => match bytes.as_str() {
         "ConstantValue" => constant_value::read(sr),
         "Code" => code::read(sr, constant_pool),
@@ -59,17 +57,17 @@ impl AttributeInfo {
         "RuntimeInvisibleParameterAnnotations" => runtime_parameter_annotations::read::<false>(sr),
         "AnnotationDefault" => annotation_default::read(sr),
         "BootstrapMethods" => bootstrap_methods::read(sr),
-        _ => todo!(),
+        _ => todo!()
       },
       _ => panic!(
         "Constant at index {} was not a valid Utf8 identifier",
         attribute_name_index
-      ),
+      )
     };
     Self {
       attribute_name_index,
       attribute_length,
-      attribute,
+      attribute
     }
   }
 }

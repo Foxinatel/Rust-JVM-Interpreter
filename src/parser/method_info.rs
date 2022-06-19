@@ -1,6 +1,5 @@
-use crate::stream_reader::StreamReader;
-
 use super::{attribute_info::AttributeInfo, cp_info::CpInfo};
+use crate::stream_reader::StreamReader;
 
 #[derive(Debug)]
 pub struct MethodInfo {
@@ -8,7 +7,7 @@ pub struct MethodInfo {
   pub name_index: u16,
   pub descriptor_index: u16,
   pub attributes_count: u16,
-  pub attributes: Vec<AttributeInfo>,
+  pub attributes: Vec<AttributeInfo>
 }
 
 impl MethodInfo {
@@ -27,7 +26,7 @@ impl MethodInfo {
       name_index,
       descriptor_index,
       attributes_count,
-      attributes,
+      attributes
     })
   }
 }

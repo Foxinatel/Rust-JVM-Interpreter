@@ -5,7 +5,7 @@ pub struct Exception {
   pub start_pc: u16,
   pub end_pc: u16,
   pub handler_pc: u16,
-  pub catch_type: u16,
+  pub catch_type: u16
 }
 
 impl Exception {
@@ -14,7 +14,7 @@ impl Exception {
       start_pc: sr.get_u16(),
       end_pc: sr.get_u16(),
       handler_pc: sr.get_u16(),
-      catch_type: sr.get_u16(),
+      catch_type: sr.get_u16()
     };
   }
 }

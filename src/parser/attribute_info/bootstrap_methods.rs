@@ -9,6 +9,6 @@ pub fn read(sr: &mut StreamReader) -> ATTRIBUTE {
 
   ATTRIBUTE::BootstrapMethods {
     num_bootstrap_methods,
-    bootstrap_methods,
+    bootstrap_methods
   }
 }

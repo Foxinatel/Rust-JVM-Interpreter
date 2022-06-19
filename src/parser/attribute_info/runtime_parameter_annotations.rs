@@ -1,6 +1,5 @@
-use crate::stream_reader::StreamReader;
-
 use super::attribute::{parameter_annotation::ParameterAnnotation, ATTRIBUTE};
+use crate::stream_reader::StreamReader;
 
 pub fn read<const VISIBLE: bool>(sr: &mut StreamReader) -> ATTRIBUTE {
   let num_annotations = sr.get_u16();
@@ -11,12 +10,12 @@ pub fn read<const VISIBLE: bool>(sr: &mut StreamReader) -> ATTRIBUTE {
   if VISIBLE {
     return ATTRIBUTE::RuntimeVisibleParameterAnnotations {
       num_annotations,
-      parameter_annotations,
+      parameter_annotations
     };
   } else {
     return ATTRIBUTE::RuntimeInvisibleParameterAnnotations {
       num_annotations,
-      parameter_annotations,
+      parameter_annotations
     };
   }
 }

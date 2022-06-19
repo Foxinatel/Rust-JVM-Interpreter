@@ -6,46 +6,46 @@ pub enum Instructions {
   nop,
   aconst_null,
   iconst {
-    value: i32,
+    value: i32
   },
   lconst {
-    value: i64,
+    value: i64
   },
   fconst {
-    value: f32,
+    value: f32
   },
   dconst {
-    value: f64,
+    value: f64
   },
   bipush {
-    value: i8,
+    value: i8
   },
   sipush {
-    value: i16,
+    value: i16
   },
   ldc {
-    index: u8,
+    index: u8
   },
   ldc_w {
-    index: u16,
+    index: u16
   },
   ldc2_w {
-    index: u16,
+    index: u16
   },
   iload {
-    index: u8,
+    index: u8
   },
   lload {
-    index: u8,
+    index: u8
   },
   fload {
-    index: u8,
+    index: u8
   },
   dload {
-    index: u8,
+    index: u8
   },
   aload {
-    index: u8,
+    index: u8
   },
   iaload,
   laload,
@@ -56,19 +56,19 @@ pub enum Instructions {
   caload,
   saload,
   istore {
-    index: u8,
+    index: u8
   },
   lstore {
-    index: u8,
+    index: u8
   },
   fstore {
-    index: u8,
+    index: u8
   },
   dstore {
-    index: u8,
+    index: u8
   },
   astore {
-    index: u8,
+    index: u8
   },
   iastore,
   lastore,
@@ -125,7 +125,7 @@ pub enum Instructions {
   lxor,
   iinc {
     index: u8,
-    r#const: i8,
+    r#const: i8
   },
   i2l,
   i2f,
@@ -148,66 +148,66 @@ pub enum Instructions {
   dcmpl,
   dcmpg,
   ifeq {
-    offset: i16,
+    offset: i16
   },
   ifne {
-    offset: i16,
+    offset: i16
   },
   iflt {
-    offset: i16,
+    offset: i16
   },
   ifge {
-    offset: i16,
+    offset: i16
   },
   ifgt {
-    offset: i16,
+    offset: i16
   },
   ifle {
-    offset: i16,
+    offset: i16
   },
   if_icmpeq {
-    offset: i16,
+    offset: i16
   },
   if_icmpne {
-    offset: i16,
+    offset: i16
   },
   if_icmplt {
-    offset: i16,
+    offset: i16
   },
   if_icmpge {
-    offset: i16,
+    offset: i16
   },
   if_icmpgt {
-    offset: i16,
+    offset: i16
   },
   if_icmple {
-    offset: i16,
+    offset: i16
   },
   if_acmpeq {
-    offset: i16,
+    offset: i16
   },
   if_acmpne {
-    offset: i16,
+    offset: i16
   },
   goto {
-    offset: i16,
+    offset: i16
   },
   jsr {
-    offset: i16,
+    offset: i16
   },
   ret {
-    index: u8,
+    index: u8
   },
   tableswitch {
     default: i32,
     low: i32,
     high: i32,
-    offsets: Vec<i32>,
+    offsets: Vec<i32>
   },
   lookupswith {
     default: i32,
     npairs: i32,
-    pairs: Vec<(i32, i32)>,
+    pairs: Vec<(i32, i32)>
   },
   ireturn,
   lreturn,
@@ -216,79 +216,79 @@ pub enum Instructions {
   areturn,
   r#return,
   getstatic {
-    index: u16,
+    index: u16
   },
   putstatic {
-    index: u16,
+    index: u16
   },
   getfield {
-    index: u16,
+    index: u16
   },
   putfield {
-    index: u16,
+    index: u16
   },
   invokevirtual {
-    index: u16,
+    index: u16
   },
   invokespecial {
-    index: u16,
+    index: u16
   },
   invokestatic {
-    index: u16,
+    index: u16
   },
   invokeinterface {
     index: u16,
-    count: u8,
+    count: u8
   },
   invokedynamic {
-    index: u16,
+    index: u16
   },
   new {
-    index: u16,
+    index: u16
   },
   newarray {
-    atype: u8,
+    atype: u8
   },
   anewarray {
-    index: u16,
+    index: u16
   },
   arraylength,
   athrow,
   checkcast {
-    index: u16,
+    index: u16
   },
   instanceof {
-    index: u16,
+    index: u16
   },
   monitorenter,
   monitorexit,
   wide1 {
     opcode: u8,
-    index_extension: u16,
+    index_extension: u16
   },
   wide2 {
     opcode: u8,
     index_extension: u16,
-    constbytes: i16,
+    constbytes: i16
   },
   multianewarray {
     index: u16,
-    dimensions: u8,
+    dimensions: u8
   },
   ifnull {
-    offset: i16,
+    offset: i16
   },
   ifnonnull {
-    offset: i16,
+    offset: i16
   },
   goto_w {
-    offset: i32,
+    offset: i32
   },
   jsr_w {
-    offset: i32,
-  },
+    offset: i32
+  }
 }
- 
+
 pub fn generate_instructions(sr: &mut StreamReader) -> Vec<(usize, Instructions)> {
   let mut instructions = Vec::new();
   loop {
@@ -296,51 +296,37 @@ pub fn generate_instructions(sr: &mut StreamReader) -> Vec<(usize, Instructions)
       return instructions;
     }
     let inst = sr.get_u8();
-    instructions.push((sr.ptr,match inst {
+    instructions.push((sr.ptr, match inst {
       0 => Instructions::nop,
       1 => Instructions::aconst_null,
       (2..=8) => Instructions::iconst {
-        value: inst as i32 - 3,
+        value: inst as i32 - 3
       },
       (9..=10) => Instructions::lconst {
-        value: inst as i64 - 9,
+        value: inst as i64 - 9
       },
       (11..=13) => Instructions::fconst {
-        value: inst as f32 - 11.0,
+        value: inst as f32 - 11.0
       },
       (14..=15) => Instructions::dconst {
-        value: inst as f64 - 14.0,
+        value: inst as f64 - 14.0
       },
-      16 => Instructions::bipush {
-        value: sr.get_i8(),
-      },
+      16 => Instructions::bipush { value: sr.get_i8() },
       17 => Instructions::sipush {
-        value: sr.get_i16(),
+        value: sr.get_i16()
       },
-      18 => Instructions::ldc {
-        index: sr.get_u8(),
-      },
+      18 => Instructions::ldc { index: sr.get_u8() },
       19 => Instructions::ldc_w {
-        index: sr.get_u16(),
+        index: sr.get_u16()
       },
       20 => Instructions::ldc2_w {
-        index: sr.get_u16(),
+        index: sr.get_u16()
       },
-      21 => Instructions::iload {
-        index: sr.get_u8(),
-      },
-      22 => Instructions::lload {
-        index: sr.get_u8(),
-      },
-      23 => Instructions::fload {
-        index: sr.get_u8(),
-      },
-      24 => Instructions::dload {
-        index: sr.get_u8(),
-      },
-      25 => Instructions::aload {
-        index: sr.get_u8(),
-      },
+      21 => Instructions::iload { index: sr.get_u8() },
+      22 => Instructions::lload { index: sr.get_u8() },
+      23 => Instructions::fload { index: sr.get_u8() },
+      24 => Instructions::dload { index: sr.get_u8() },
+      25 => Instructions::aload { index: sr.get_u8() },
       (26..=29) => Instructions::iload { index: inst - 26 },
       (30..=33) => Instructions::lload { index: inst - 30 },
       (34..=37) => Instructions::fload { index: inst - 34 },
@@ -354,21 +340,11 @@ pub fn generate_instructions(sr: &mut StreamReader) -> Vec<(usize, Instructions)
       51 => Instructions::baload,
       52 => Instructions::caload,
       53 => Instructions::saload,
-      54 => Instructions::istore {
-        index: sr.get_u8(),
-      },
-      55 => Instructions::lstore {
-        index: sr.get_u8(),
-      },
-      56 => Instructions::fstore {
-        index: sr.get_u8(),
-      },
-      57 => Instructions::dstore {
-        index: sr.get_u8(),
-      },
-      58 => Instructions::astore {
-        index: sr.get_u8(),
-      },
+      54 => Instructions::istore { index: sr.get_u8() },
+      55 => Instructions::lstore { index: sr.get_u8() },
+      56 => Instructions::fstore { index: sr.get_u8() },
+      57 => Instructions::dstore { index: sr.get_u8() },
+      58 => Instructions::astore { index: sr.get_u8() },
       (59..=62) => Instructions::istore { index: inst - 59 },
       (63..=66) => Instructions::lstore { index: inst - 63 },
       (67..=70) => Instructions::fstore { index: inst - 67 },
@@ -429,7 +405,7 @@ pub fn generate_instructions(sr: &mut StreamReader) -> Vec<(usize, Instructions)
       131 => Instructions::lxor,
       132 => Instructions::iinc {
         index: sr.get_u8(),
-        r#const: sr.get_i8(),
+        r#const: sr.get_i8()
       },
       133 => Instructions::i2l,
       134 => Instructions::i2f,
@@ -452,56 +428,54 @@ pub fn generate_instructions(sr: &mut StreamReader) -> Vec<(usize, Instructions)
       151 => Instructions::dcmpl,
       152 => Instructions::dcmpg,
       153 => Instructions::ifeq {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       154 => Instructions::ifne {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       155 => Instructions::iflt {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       156 => Instructions::ifge {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       157 => Instructions::ifgt {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       158 => Instructions::ifle {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       159 => Instructions::if_icmpeq {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       160 => Instructions::if_icmpne {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       161 => Instructions::if_icmplt {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       162 => Instructions::if_icmpge {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       163 => Instructions::if_icmpgt {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       164 => Instructions::if_icmple {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       165 => Instructions::if_acmpeq {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       166 => Instructions::if_acmpne {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       167 => Instructions::goto {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       168 => Instructions::jsr {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
-      169 => Instructions::ret {
-        index: sr.get_u8(),
-      },
+      169 => Instructions::ret { index: sr.get_u8() },
       170 => {
         let default = sr.get_i32();
         let low = sr.get_i32();
@@ -511,19 +485,17 @@ pub fn generate_instructions(sr: &mut StreamReader) -> Vec<(usize, Instructions)
           default,
           low,
           high,
-          offsets,
+          offsets
         }
       }
       171 => {
         let default = sr.get_i32();
         let npairs = sr.get_i32();
-        let pairs: Vec<(i32, i32)> = (0..npairs)
-          .map(|_| (sr.get_i32(), sr.get_i32()))
-          .collect();
+        let pairs: Vec<(i32, i32)> = (0..npairs).map(|_| (sr.get_i32(), sr.get_i32())).collect();
         Instructions::lookupswith {
           default,
           npairs,
-          pairs,
+          pairs
         }
       }
       172 => Instructions::ireturn,
@@ -533,25 +505,25 @@ pub fn generate_instructions(sr: &mut StreamReader) -> Vec<(usize, Instructions)
       176 => Instructions::areturn,
       177 => Instructions::r#return,
       178 => Instructions::getstatic {
-        index: sr.get_u16(),
+        index: sr.get_u16()
       },
       179 => Instructions::putstatic {
-        index: sr.get_u16(),
+        index: sr.get_u16()
       },
       180 => Instructions::getfield {
-        index: sr.get_u16(),
+        index: sr.get_u16()
       },
       181 => Instructions::putfield {
-        index: sr.get_u16(),
+        index: sr.get_u16()
       },
       182 => Instructions::invokevirtual {
-        index: sr.get_u16(),
+        index: sr.get_u16()
       },
       183 => Instructions::invokespecial {
-        index: sr.get_u16(),
+        index: sr.get_u16()
       },
       184 => Instructions::invokestatic {
-        index: sr.get_u16(),
+        index: sr.get_u16()
       },
       185 => {
         let index = sr.get_u16();
@@ -561,29 +533,23 @@ pub fn generate_instructions(sr: &mut StreamReader) -> Vec<(usize, Instructions)
       }
       186 => {
         let index = sr.get_u16();
-        assert_eq!(
-          sr.get_u16(),
-          0,
-          "Final bytes of invokedynamic was non-zero"
-        );
+        assert_eq!(sr.get_u16(), 0, "Final bytes of invokedynamic was non-zero");
         Instructions::invokedynamic { index }
       }
       187 => Instructions::new {
-        index: sr.get_u16(),
+        index: sr.get_u16()
       },
-      188 => Instructions::newarray {
-        atype: sr.get_u8(),
-      },
+      188 => Instructions::newarray { atype: sr.get_u8() },
       189 => Instructions::anewarray {
-        index: sr.get_u16(),
+        index: sr.get_u16()
       },
       190 => Instructions::arraylength,
       191 => Instructions::athrow,
       192 => Instructions::checkcast {
-        index: sr.get_u16(),
+        index: sr.get_u16()
       },
       193 => Instructions::instanceof {
-        index: sr.get_u16(),
+        index: sr.get_u16()
       },
       194 => Instructions::monitorenter,
       195 => Instructions::monitorexit,
@@ -592,33 +558,33 @@ pub fn generate_instructions(sr: &mut StreamReader) -> Vec<(usize, Instructions)
         match opcode {
           (21..=25) | (54..=58) | 169 => Instructions::wide1 {
             opcode,
-            index_extension: sr.get_u16(),
+            index_extension: sr.get_u16()
           },
           132 => Instructions::wide2 {
             opcode,
             index_extension: sr.get_u16(),
-            constbytes: sr.get_i16(),
+            constbytes: sr.get_i16()
           },
-          _ => panic!("Attempted to perform 'wide' on invalid opcode"),
+          _ => panic!("Attempted to perform 'wide' on invalid opcode")
         }
       }
       197 => Instructions::multianewarray {
         index: sr.get_u16(),
-        dimensions: sr.get_u8(),
+        dimensions: sr.get_u8()
       },
       198 => Instructions::ifnull {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       199 => Instructions::ifnonnull {
-        offset: sr.get_i16(),
+        offset: sr.get_i16()
       },
       200 => Instructions::goto_w {
-        offset: sr.get_i32(),
+        offset: sr.get_i32()
       },
       201 => Instructions::jsr_w {
-        offset: sr.get_i32(),
+        offset: sr.get_i32()
       },
-      (202..) => panic!("Instruction not yet implemented"),
+      (202..) => panic!("Instruction not yet implemented")
     }));
   }
 }
