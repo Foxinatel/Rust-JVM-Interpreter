@@ -2,7 +2,7 @@
 
 use std::env;
 
-use crate::{evaluate::{JVM, minify::MinifiedClassFile}, parser::classfile::ClassFile};
+use crate::{evaluate::minify::MinifiedClassFile, parser::classfile::ClassFile};
 
 mod evaluate;
 mod parser;

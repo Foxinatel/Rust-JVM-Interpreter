@@ -34,8 +34,8 @@ pub enum Type {
 macro_rules! get_type {
   ($variant:ident, $val:expr) => {{
     let Type::$variant(value) = $val else {
-                  panic!("Found value {:?} which is not of type {}", $val, stringify!($variant))
-                };
+          panic!("Found value {:?} which is not of type {}", $val, stringify!($variant))
+        };
     value
   }};
 }
@@ -43,8 +43,8 @@ macro_rules! get_type {
 macro_rules! assert_type {
   ($variant:ident, $val:expr) => {
     let Type::$variant(_) = $val else {
-                      panic!("Found value {:?} which is not of type {}", $val, stringify!($variant))
-                    };
+              panic!("Found value {:?} which is not of type {}", $val, stringify!($variant))
+            };
   };
 }
 
@@ -61,19 +61,19 @@ pub struct JVM {
 //set current directory to the target's directory
 //resolve other necessary classfiles
 impl JVM {
-  // pub fn from_path(path: String) -> Self {
-    // env::set_current_dir(Path::new(&path).parent().unwrap()).unwrap();
-    // let newpath = String::from(Path::new(&path).file_name().unwrap().to_str().unwrap());
-    // let mut resolver = Resolver::new();
-    // let (name, cf) = ClassFile::read(newpath);
-    // resolver.resolve((name.clone(), cf));
-    // Self {
-    //   entrypoint: name,
-    //   classes: resolver.resolved
-    // }
-  // }
+  pub fn from_path(path: String) -> Self {
+    env::set_current_dir(Path::new(&path).parent().unwrap()).unwrap();
+    let newpath = String::from(Path::new(&path).file_name().unwrap().to_str().unwrap());
+    let mut resolver = Resolver::new();
+    let (name, cf) = ClassFile::read(newpath);
+    resolver.resolve((name.clone(), cf));
+    Self {
+      entrypoint: name,
+      classes: resolver.resolved
+    }
+  }
 
-  pub fn start(&self) { let cf = self.classes.get(&self.entrypoint).unwrap(); }
+  pub fn start(&self) { let _cf = self.classes.get(&self.entrypoint).unwrap(); }
 
   //Should probably change this to use a MethodInfo
   fn evaluate(&self, code: ATTRIBUTE) -> Option<Type> {
@@ -102,9 +102,9 @@ impl JVM {
             Instructions::dconst { value } => stack.push(Type::Double(*value)),
             Instructions::bipush { value } => stack.push(Type::Int(*value as i32)),
             Instructions::sipush { value } => stack.push(Type::Int(*value as i32)),
-            Instructions::ldc { index } => todo!(),
-            Instructions::ldc_w { index } => todo!(),
-            Instructions::ldc2_w { index } => todo!(),
+            Instructions::ldc { index: _ } => todo!(),
+            Instructions::ldc_w { index: _ } => todo!(),
+            Instructions::ldc2_w { index: _ } => todo!(),
             Instructions::iload { index } => {
               let val = get_type!(Int, &locals[*index as usize]);
               stack.push(Type::Int(*val))
@@ -655,18 +655,18 @@ impl JVM {
             Instructions::goto { offset } => {
               pc = (pc as isize + *offset as isize - 1) as usize;
             }
-            Instructions::jsr { offset } => todo!(),
-            Instructions::ret { index } => todo!(),
+            Instructions::jsr { offset: _ } => todo!(),
+            Instructions::ret { index: _ } => todo!(),
             Instructions::tableswitch {
-              default,
-              low,
-              high,
-              offsets
+              default: _,
+              low: _,
+              high: _,
+              offsets: _
             } => todo!(),
             Instructions::lookupswith {
-              default,
-              npairs,
-              pairs
+              default: _,
+              npairs: _,
+              pairs: _
             } => todo!(),
             Instructions::ireturn => {
               let val = stack.pop().unwrap();
@@ -694,38 +694,41 @@ impl JVM {
               return Some(val);
             }
             Instructions::r#return => return None,
-            Instructions::getstatic { index } => todo!(),
-            Instructions::putstatic { index } => todo!(),
-            Instructions::getfield { index } => todo!(),
-            Instructions::putfield { index } => todo!(),
-            Instructions::invokevirtual { index } => todo!(),
-            Instructions::invokespecial { index } => todo!(),
-            Instructions::invokestatic { index } => todo!(),
-            Instructions::invokeinterface { index, count } => todo!(),
-            Instructions::invokedynamic { index } => todo!(),
-            Instructions::new { index } => todo!(),
-            Instructions::newarray { atype } => todo!(),
-            Instructions::anewarray { index } => todo!(),
+            Instructions::getstatic { index: _ } => todo!(),
+            Instructions::putstatic { index: _ } => todo!(),
+            Instructions::getfield { index: _ } => todo!(),
+            Instructions::putfield { index: _ } => todo!(),
+            Instructions::invokevirtual { index: _ } => todo!(),
+            Instructions::invokespecial { index: _ } => todo!(),
+            Instructions::invokestatic { index: _ } => todo!(),
+            Instructions::invokeinterface { index: _, count: _ } => todo!(),
+            Instructions::invokedynamic { index: _ } => todo!(),
+            Instructions::new { index: _ } => todo!(),
+            Instructions::newarray { atype: _ } => todo!(),
+            Instructions::anewarray { index: _ } => todo!(),
             Instructions::arraylength => todo!(),
             Instructions::athrow => todo!(),
-            Instructions::checkcast { index } => todo!(),
-            Instructions::instanceof { index } => todo!(),
+            Instructions::checkcast { index: _ } => todo!(),
+            Instructions::instanceof { index: _ } => todo!(),
             Instructions::monitorenter => todo!(),
             Instructions::monitorexit => todo!(),
             Instructions::wide1 {
-              opcode,
-              index_extension
+              opcode: _,
+              index_extension: _
             } => todo!(),
             Instructions::wide2 {
-              opcode,
-              index_extension,
-              constbytes
+              opcode: _,
+              index_extension: _,
+              constbytes: _
             } => todo!(),
-            Instructions::multianewarray { index, dimensions } => todo!(),
-            Instructions::ifnull { offset } => todo!(),
-            Instructions::ifnonnull { offset } => todo!(),
-            Instructions::goto_w { offset } => todo!(),
-            Instructions::jsr_w { offset } => todo!()
+            Instructions::multianewarray {
+              index: _,
+              dimensions: _
+            } => todo!(),
+            Instructions::ifnull { offset: _ } => todo!(),
+            Instructions::ifnonnull { offset: _ } => todo!(),
+            Instructions::goto_w { offset: _ } => todo!(),
+            Instructions::jsr_w { offset: _ } => todo!()
           }
           pc += 1;
         }
