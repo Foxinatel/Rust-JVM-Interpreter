@@ -6,14 +6,8 @@ pub fn read<const VISIBLE: bool>(sr: &mut StreamReader) -> ATTRIBUTE {
   let annotations: Vec<Annotation> = (0..num_annotations).map(|_| Annotation::read(sr)).collect();
 
   if VISIBLE {
-    return ATTRIBUTE::RuntimeVisibleAnnotations {
-      num_annotations,
-      annotations
-    };
+    return ATTRIBUTE::RuntimeVisibleAnnotations { annotations };
   } else {
-    return ATTRIBUTE::RuntimeInvisibleAnnotations {
-      num_annotations,
-      annotations
-    };
+    return ATTRIBUTE::RuntimeInvisibleAnnotations { annotations };
   }
 }

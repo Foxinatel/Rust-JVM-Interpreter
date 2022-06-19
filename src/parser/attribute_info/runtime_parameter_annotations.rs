@@ -9,12 +9,10 @@ pub fn read<const VISIBLE: bool>(sr: &mut StreamReader) -> ATTRIBUTE {
 
   if VISIBLE {
     return ATTRIBUTE::RuntimeVisibleParameterAnnotations {
-      num_annotations,
       parameter_annotations
     };
   } else {
     return ATTRIBUTE::RuntimeInvisibleParameterAnnotations {
-      num_annotations,
       parameter_annotations
     };
   }

@@ -7,8 +7,5 @@ pub fn read(sr: &mut StreamReader) -> ATTRIBUTE {
     .map(|_| LineNumber::read(sr))
     .collect();
 
-  ATTRIBUTE::LineNumberTable {
-    line_number_table_length,
-    line_number_table
-  }
+  ATTRIBUTE::LineNumberTable { line_number_table }
 }

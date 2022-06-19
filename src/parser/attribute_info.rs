@@ -1,5 +1,5 @@
 use self::attribute::ATTRIBUTE;
-use super::cp_info::CpInfo;
+use super::cp_info_resolved::ResolvedCpInfo;
 use crate::stream_reader::StreamReader;
 
 pub mod annotation_default;
@@ -20,7 +20,7 @@ pub mod source_debug_extensions;
 pub mod source_file;
 pub mod stack_map_table;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct AttributeInfo {
   pub attribute_name_index: u16,
   pub attribute_length: u32,
@@ -28,15 +28,11 @@ pub struct AttributeInfo {
 }
 
 impl AttributeInfo {
-  pub fn read(sr: &mut StreamReader, constant_pool: &Vec<CpInfo>) -> Self {
+  pub fn read(sr: &mut StreamReader, constant_pool: &Vec<ResolvedCpInfo>) -> Self {
     let attribute_name_index = sr.get_u16();
     let attribute_length = sr.get_u32();
     let attribute = match &constant_pool[attribute_name_index as usize - 1] {
-      CpInfo::Utf8 {
-        tag: _,
-        length: _,
-        bytes
-      } => match bytes.as_str() {
+      ResolvedCpInfo::Utf8(string) => match string.as_str() {
         "ConstantValue" => constant_value::read(sr),
         "Code" => code::read(sr, constant_pool),
         "StackMapTable" => stack_map_table::read(sr),
@@ -44,8 +40,8 @@ impl AttributeInfo {
         "InnerClasses" => inner_classes::read(sr),
         "EnclosingMethod" => enclosing_method::read(sr),
         "Synthetic" => ATTRIBUTE::Synthetic,
-        "Signature" => signature::read(sr),
-        "SourceFile" => source_file::read(sr),
+        "Signature" => signature::read(sr, constant_pool),
+        "SourceFile" => source_file::read(sr, constant_pool),
         "SourceDebugExtension" => source_debug_extensions::read(sr, attribute_length),
         "LineNumberTable" => line_number_table::read(sr),
         "LocalVariableTable" => local_variable_table::read(sr),
@@ -55,7 +51,7 @@ impl AttributeInfo {
         "RuntimeInvisibleAnnotations" => runtime_annotations::read::<false>(sr),
         "RuntimeVisibleParameterAnnotations" => runtime_parameter_annotations::read::<true>(sr),
         "RuntimeInvisibleParameterAnnotations" => runtime_parameter_annotations::read::<false>(sr),
-        "AnnotationDefault" => annotation_default::read(sr),
+        "AnnotationDefault" => annotation_default::read(sr, constant_pool),
         "BootstrapMethods" => bootstrap_methods::read(sr),
         _ => todo!()
       },

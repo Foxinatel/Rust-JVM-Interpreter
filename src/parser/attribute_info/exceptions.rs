@@ -6,7 +6,6 @@ pub fn read(sr: &mut StreamReader) -> ATTRIBUTE {
   let exception_index_table: Vec<u16> = (0..number_of_exceptions).map(|_| sr.get_u16()).collect();
 
   ATTRIBUTE::Exceptions {
-    number_of_exceptions,
     exception_index_table
   }
 }

@@ -1,9 +1,8 @@
 use crate::stream_reader::StreamReader;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct BootstrapMethod {
   pub bootstrap_method_ref: u16,
-  pub num_bootstrap_arguments: u16,
   pub bootstrap_methods: Vec<u16>
 }
 
@@ -15,7 +14,6 @@ impl BootstrapMethod {
 
     BootstrapMethod {
       bootstrap_method_ref,
-      num_bootstrap_arguments,
       bootstrap_methods
     }
   }

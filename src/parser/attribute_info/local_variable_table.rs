@@ -8,7 +8,6 @@ pub fn read(sr: &mut StreamReader) -> ATTRIBUTE {
     .collect();
 
   ATTRIBUTE::LocalVariableTable {
-    local_variable_table_length,
     local_variable_table
   }
 }

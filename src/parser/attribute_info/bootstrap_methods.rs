@@ -7,8 +7,5 @@ pub fn read(sr: &mut StreamReader) -> ATTRIBUTE {
     .map(|_| BootstrapMethod::read(sr))
     .collect();
 
-  ATTRIBUTE::BootstrapMethods {
-    num_bootstrap_methods,
-    bootstrap_methods
-  }
+  ATTRIBUTE::BootstrapMethods { bootstrap_methods }
 }

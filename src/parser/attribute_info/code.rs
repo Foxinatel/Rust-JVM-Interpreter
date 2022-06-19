@@ -3,12 +3,12 @@ use super::{
   attribute::{exception::Exception, ATTRIBUTE},
   AttributeInfo
 };
-use crate::{parser::cp_info::CpInfo, stream_reader::StreamReader};
+use crate::{parser::cp_info_resolved::ResolvedCpInfo, stream_reader::StreamReader};
 
 pub mod clean_jumps;
 pub mod code_generator;
 
-pub fn read(sr: &mut StreamReader, constant_pool: &Vec<CpInfo>) -> ATTRIBUTE {
+pub fn read(sr: &mut StreamReader, constant_pool: &Vec<ResolvedCpInfo>) -> ATTRIBUTE {
   let max_stack = sr.get_u16();
   let max_locals = sr.get_u16();
   let code_length = sr.get_u32();
@@ -27,11 +27,8 @@ pub fn read(sr: &mut StreamReader, constant_pool: &Vec<CpInfo>) -> ATTRIBUTE {
   ATTRIBUTE::Code {
     max_stack,
     max_locals,
-    code_length,
     code,
-    exception_table_length,
     exception_table,
-    attributes_count,
     attributes
   }
 }

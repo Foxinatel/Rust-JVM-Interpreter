@@ -7,8 +7,5 @@ pub fn read(sr: &mut StreamReader) -> ATTRIBUTE {
     .map(|_| StackMapFrame::read(sr))
     .collect();
 
-  ATTRIBUTE::StackMapTable {
-    number_of_entries,
-    entries
-  }
+  ATTRIBUTE::StackMapTable { entries }
 }
