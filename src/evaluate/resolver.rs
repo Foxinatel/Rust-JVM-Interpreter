@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
+use super::minify::MinifiedClassFile;
 use crate::parser::{classfile::ClassFile, cp_info::CpInfo};
 
 pub struct Resolver {
-  pub resolved: HashMap<String, ClassFile>
+  pub resolved: HashMap<String, MinifiedClassFile>
 }
 
 impl Resolver {
@@ -15,7 +16,8 @@ impl Resolver {
 
   pub fn resolve(&mut self, (name, cf): (String, ClassFile)) {
     let constant_pool = cf.constant_pool.clone();
-    self.resolved.insert(name, cf);
+    let (newname, newcf) = MinifiedClassFile::from(cf);
+    self.resolved.insert(newname, newcf);
     for i in constant_pool.as_slice() {
       match i {
         CpInfo::Fieldref {

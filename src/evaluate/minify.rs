@@ -17,7 +17,7 @@ mod mini_name_and_type_info;
 #[derive(Debug)]
 pub struct MinifiedClassFile {
   access_flags: u16,
-  this_class: MiniClassInfo,
+  // this_class: MiniClassInfo,
   super_class: MiniClassInfo,
   interfaces: Vec<MiniClassInfo>,
   fields: HashMap<String, MiniFieldInfo>,
@@ -26,7 +26,7 @@ pub struct MinifiedClassFile {
 }
 
 impl MinifiedClassFile {
-  pub fn from(cf: ClassFile) -> Self {
+  pub fn from(cf: ClassFile) -> (String, Self) {
     let constant_pool = &cf.constant_pool;
 
     let access_flags = cf.access_flags;
@@ -67,14 +67,14 @@ impl MinifiedClassFile {
       .map(|val| MiniAttribute::from(val, &constant_pool))
       .collect();
 
-    Self {
+    (this_class.name, Self {
       access_flags,
-      this_class,
+      // this_class,
       super_class,
       interfaces,
       fields,
       methods,
       attributes
-    }
+    })
   }
 }

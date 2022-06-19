@@ -1,6 +1,6 @@
 use std::{cell::RefCell, collections::HashMap, env, path::Path, rc::Rc};
 
-use self::resolver::Resolver;
+use self::{minify::MinifiedClassFile, resolver::Resolver};
 use crate::parser::{
   attribute_info::{attribute::ATTRIBUTE, code::code_generator::Instructions},
   classfile::ClassFile
@@ -34,8 +34,8 @@ pub enum Type {
 macro_rules! get_type {
   ($variant:ident, $val:expr) => {{
     let Type::$variant(value) = $val else {
-          panic!("Found value {:?} which is not of type {}", $val, stringify!($variant))
-        };
+            panic!("Found value {:?} which is not of type {}", $val, stringify!($variant))
+          };
     value
   }};
 }
@@ -43,8 +43,8 @@ macro_rules! get_type {
 macro_rules! assert_type {
   ($variant:ident, $val:expr) => {
     let Type::$variant(_) = $val else {
-              panic!("Found value {:?} which is not of type {}", $val, stringify!($variant))
-            };
+                  panic!("Found value {:?} which is not of type {}", $val, stringify!($variant))
+                };
   };
 }
 
@@ -55,7 +55,7 @@ pub mod minify;
 #[derive(Debug)]
 pub struct JVM {
   entrypoint: String,
-  classes: HashMap<String, ClassFile>
+  classes: HashMap<String, MinifiedClassFile>
 }
 
 //set current directory to the target's directory
