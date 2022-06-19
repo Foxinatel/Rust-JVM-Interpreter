@@ -22,7 +22,7 @@ pub struct ClassFile {
   pub fields_count: u16,
   pub fields: Vec<FieldInfo>, //field_info fields[fields_count];
   pub methods_count: u16,
-  pub methods: HashMap<String, MethodInfo>, //method_info methods[methods_count];
+  pub methods: Vec<MethodInfo>, //method_info methods[methods_count];
   pub attributes_count: u16,
   pub attributes: Vec<AttributeInfo> //attribute_info attributes[attributes_count];
 }
@@ -52,7 +52,7 @@ impl ClassFile {
       .map(|_| FieldInfo::read(sr, &constant_pool))
       .collect();
     let methods_count = sr.get_u16();
-    let methods: HashMap<String, MethodInfo> = (0..methods_count)
+    let methods: Vec<MethodInfo> = (0..methods_count)
       .map(|_| MethodInfo::read(sr, &constant_pool))
       .collect();
     let attributes_count = sr.get_u16();

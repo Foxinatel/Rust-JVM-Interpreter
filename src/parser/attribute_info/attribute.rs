@@ -23,7 +23,7 @@ pub mod local_variable_type;
 pub mod parameter_annotation;
 pub mod stack_map_frame;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ATTRIBUTE {
   ConstantValue {
     constantvalue_index: u16

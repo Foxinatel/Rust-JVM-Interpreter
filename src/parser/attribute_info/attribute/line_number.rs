@@ -1,6 +1,6 @@
 use crate::stream_reader::StreamReader;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LineNumber {
   pub start_pc: u16,
   pub line_number: u16

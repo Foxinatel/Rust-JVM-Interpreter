@@ -34,8 +34,8 @@ pub enum Type {
 macro_rules! get_type {
   ($variant:ident, $val:expr) => {{
     let Type::$variant(value) = $val else {
-            panic!("Found value {:?} which is not of type {}", $val, stringify!($variant))
-          };
+                  panic!("Found value {:?} which is not of type {}", $val, stringify!($variant))
+                };
     value
   }};
 }
@@ -43,30 +43,37 @@ macro_rules! get_type {
 macro_rules! assert_type {
   ($variant:ident, $val:expr) => {
     let Type::$variant(_) = $val else {
-                  panic!("Found value {:?} which is not of type {}", $val, stringify!($variant))
-                };
+                      panic!("Found value {:?} which is not of type {}", $val, stringify!($variant))
+                    };
   };
 }
 
 mod resolver;
 
+pub mod minify;
+
 #[derive(Debug)]
 pub struct JVM {
-  pub classes: HashMap<String, ClassFile>
+  entrypoint: String,
+  classes: HashMap<String, ClassFile>
 }
 
 //set current directory to the target's directory
 //resolve other necessary classfiles
 impl JVM {
-  pub fn from_path(path: String) -> Self {
-    env::set_current_dir(Path::new(&path).parent().unwrap()).unwrap();
-    let newpath = String::from(Path::new(&path).file_name().unwrap().to_str().unwrap());
-    let mut resolver = Resolver::new();
-    resolver.resolve(ClassFile::read(newpath));
-    Self {
-      classes: resolver.resolved
-    }
-  }
+  // pub fn from_path(path: String) -> Self {
+    // env::set_current_dir(Path::new(&path).parent().unwrap()).unwrap();
+    // let newpath = String::from(Path::new(&path).file_name().unwrap().to_str().unwrap());
+    // let mut resolver = Resolver::new();
+    // let (name, cf) = ClassFile::read(newpath);
+    // resolver.resolve((name.clone(), cf));
+    // Self {
+    //   entrypoint: name,
+    //   classes: resolver.resolved
+    // }
+  // }
+
+  pub fn start(&self) { let cf = self.classes.get(&self.entrypoint).unwrap(); }
 
   //Should probably change this to use a MethodInfo
   fn evaluate(&self, code: ATTRIBUTE) -> Option<Type> {

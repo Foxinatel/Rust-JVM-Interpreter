@@ -20,7 +20,7 @@ pub mod source_debug_extensions;
 pub mod source_file;
 pub mod stack_map_table;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AttributeInfo {
   pub attribute_name_index: u16,
   pub attribute_length: u32,

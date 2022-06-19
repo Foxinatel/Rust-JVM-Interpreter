@@ -11,7 +11,7 @@ pub struct MethodInfo {
 }
 
 impl MethodInfo {
-  pub fn read(sr: &mut StreamReader, constant_pool: &Vec<CpInfo>) -> (String, Self) {
+  pub fn read(sr: &mut StreamReader, constant_pool: &Vec<CpInfo>) -> Self {
     let access_flags = sr.get_u16();
     let name_index = sr.get_u16();
     let descriptor_index = sr.get_u16();
@@ -20,13 +20,12 @@ impl MethodInfo {
       .map(|_| AttributeInfo::read(sr, constant_pool))
       .collect();
 
-    let CpInfo::Utf8 { tag: _, length: _, bytes: name } = &constant_pool[name_index as usize - 1] else {panic!()};
-    (name.to_string(), Self {
+    Self {
       access_flags,
       name_index,
       descriptor_index,
       attributes_count,
       attributes
-    })
+    }
   }
 }

@@ -1,6 +1,6 @@
 use crate::stream_reader::StreamReader;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Classes {
   pub inner_class_info_index: u16,
   pub outer_class_info_index: u16,

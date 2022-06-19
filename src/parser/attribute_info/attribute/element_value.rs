@@ -1,7 +1,7 @@
 use super::Annotation;
 use crate::stream_reader::StreamReader;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ElementValues {
   ConstValueIndex(u16),
   EnumConstValue {
@@ -16,7 +16,7 @@ pub enum ElementValues {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ElementValue {
   pub tag: u8,
   pub value: ElementValues
