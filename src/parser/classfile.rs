@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fs};
 
 use super::{
-  attribute_info::AttributeInfo,
+  attribute_info::attribute::Attribute,
   cp_info::CpInfo,
   cp_info_resolved::ResolvedCpInfo,
   field_info::FieldInfo,
@@ -16,7 +16,7 @@ pub struct ClassFile {
   pub interfaces: Vec<u16>,
   pub fields: HashMap<String, FieldInfo>,
   pub methods: HashMap<String, MethodInfo>,
-  pub attributes: Vec<AttributeInfo>
+  pub attributes: Vec<Attribute>
 }
 
 impl ClassFile {
@@ -62,8 +62,8 @@ impl ClassFile {
     let methods: HashMap<String, MethodInfo> =
       (0..methods_count).map(|_| MethodInfo::read(sr, &resolved_constant_pool)).collect();
     let attributes_count = sr.get_u16();
-    let attributes: Vec<AttributeInfo> =
-      (0..attributes_count).map(|_| AttributeInfo::read(sr, &resolved_constant_pool)).collect();
+    let attributes: Vec<Attribute> =
+      (0..attributes_count).map(|_| Attribute::read(sr, &resolved_constant_pool)).collect();
     if !sr.done() {
       panic!("Extra bytes were found at the end of the classfile")
     }

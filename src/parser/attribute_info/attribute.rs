@@ -10,7 +10,7 @@ use self::{
   parameter_annotation::ParameterAnnotation,
   stack_map_frame::StackMapFrame
 };
-use super::{code::code_generator::Instructions, AttributeInfo};
+use super::code::code_generator::Instructions;
 
 pub mod annotation;
 pub mod bootstrap_method;
@@ -24,7 +24,7 @@ pub mod parameter_annotation;
 pub mod stack_map_frame;
 
 #[derive(Debug)]
-pub enum ATTRIBUTE {
+pub enum Attribute {
   ConstantValue {
     // TODO!
     constantvalue_index: u16
@@ -34,7 +34,7 @@ pub enum ATTRIBUTE {
     max_locals: u16,
     code: Vec<Instructions>,
     exception_table: Vec<Exception>,
-    attributes: Vec<AttributeInfo>
+    attributes: Vec<Attribute>
   },
   StackMapTable {
     entries: Vec<StackMapFrame>
