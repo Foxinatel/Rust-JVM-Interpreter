@@ -19,14 +19,9 @@ impl MethodInfo {
     let ResolvedCpInfo::Utf8(descriptor) = &constant_pool[descriptor_index as usize -1] else {panic!()};
 
     let attributes_count = sr.get_u16();
-    let attributes: Vec<AttributeInfo> = (0..attributes_count)
-      .map(|_| AttributeInfo::read(sr, &constant_pool))
-      .collect();
+    let attributes: Vec<AttributeInfo> =
+      (0..attributes_count).map(|_| AttributeInfo::read(sr, &constant_pool)).collect();
 
-    (name.to_owned() + descriptor, Self {
-      access_flags,
-      attributes_count,
-      attributes
-    })
+    (name.to_owned() + descriptor, Self { access_flags, attributes_count, attributes })
   }
 }

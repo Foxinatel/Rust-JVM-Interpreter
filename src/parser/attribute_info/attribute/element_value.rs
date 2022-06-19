@@ -4,16 +4,10 @@ use crate::stream_reader::StreamReader;
 #[derive(Debug)]
 pub enum ElementValues {
   ConstValueIndex(u16),
-  EnumConstValue {
-    type_name_index: u16,
-    const_name_index: u16
-  },
+  EnumConstValue { type_name_index: u16, const_name_index: u16 },
   ClassInfoIndex(u16),
   AnnotationValue(Annotation),
-  ArrayValue {
-    num_values: u16,
-    values: Vec<ElementValue>
-  }
+  ArrayValue { num_values: u16, values: Vec<ElementValue> }
 }
 
 #[derive(Debug)]

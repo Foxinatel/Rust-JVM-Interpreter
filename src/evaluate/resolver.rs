@@ -7,11 +7,7 @@ pub struct Resolver {
 }
 
 impl Resolver {
-  pub fn new() -> Self {
-    Self {
-      resolved: HashMap::new()
-    }
-  }
+  pub fn new() -> Self { Self { resolved: HashMap::new() } }
 
   pub fn resolve(&mut self, depends: Vec<String>) {
     for module in depends {

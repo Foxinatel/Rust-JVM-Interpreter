@@ -3,17 +3,12 @@ use crate::stream_reader::StreamReader;
 
 pub fn read<const VISIBLE: bool>(sr: &mut StreamReader) -> ATTRIBUTE {
   let num_annotations = sr.get_u16();
-  let parameter_annotations: Vec<ParameterAnnotation> = (0..num_annotations)
-    .map(|_| ParameterAnnotation::read(sr))
-    .collect();
+  let parameter_annotations: Vec<ParameterAnnotation> =
+    (0..num_annotations).map(|_| ParameterAnnotation::read(sr)).collect();
 
   if VISIBLE {
-    return ATTRIBUTE::RuntimeVisibleParameterAnnotations {
-      parameter_annotations
-    };
+    return ATTRIBUTE::RuntimeVisibleParameterAnnotations { parameter_annotations };
   } else {
-    return ATTRIBUTE::RuntimeInvisibleParameterAnnotations {
-      parameter_annotations
-    };
+    return ATTRIBUTE::RuntimeInvisibleParameterAnnotations { parameter_annotations };
   }
 }

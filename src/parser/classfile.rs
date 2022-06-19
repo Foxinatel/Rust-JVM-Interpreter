@@ -25,19 +25,14 @@ impl ClassFile {
       .or(fs::read(path.clone() + ".class"))
       .expect(format!("Could not find a file at {0} or {0}.class", path).as_str());
     let mut sr = &mut StreamReader::from(buf);
-    sr.stream = sr
-      .stream
-      .strip_prefix(&[0xca, 0xfe, 0xba, 0xbe])
-      .expect("File has invalid header")
-      .to_vec();
+    sr.stream =
+      sr.stream.strip_prefix(&[0xca, 0xfe, 0xba, 0xbe]).expect("File has invalid header").to_vec();
     let _minor_version = sr.get_u16();
     let _major_version = sr.get_u16();
     let constant_pool_count = sr.get_u16();
     let constant_pool: Vec<CpInfo> = (1..constant_pool_count).map(|_| CpInfo::read(sr)).collect();
-    let resolved_constant_pool: Vec<ResolvedCpInfo> = constant_pool
-      .iter()
-      .map(|val| ResolvedCpInfo::from(val, &constant_pool))
-      .collect();
+    let resolved_constant_pool: Vec<ResolvedCpInfo> =
+      constant_pool.iter().map(|val| ResolvedCpInfo::from(val, &constant_pool)).collect();
 
     let mut depends = Vec::new();
     for constant in resolved_constant_pool.iter() {
@@ -61,17 +56,14 @@ impl ClassFile {
     let interfaces_count = sr.get_u16();
     let interfaces: Vec<u16> = (0..interfaces_count).map(|_| sr.get_u16()).collect();
     let fields_count = sr.get_u16();
-    let fields: HashMap<String, FieldInfo> = (0..fields_count)
-      .map(|_| FieldInfo::read(sr, &resolved_constant_pool))
-      .collect();
+    let fields: HashMap<String, FieldInfo> =
+      (0..fields_count).map(|_| FieldInfo::read(sr, &resolved_constant_pool)).collect();
     let methods_count = sr.get_u16();
-    let methods: HashMap<String, MethodInfo> = (0..methods_count)
-      .map(|_| MethodInfo::read(sr, &resolved_constant_pool))
-      .collect();
+    let methods: HashMap<String, MethodInfo> =
+      (0..methods_count).map(|_| MethodInfo::read(sr, &resolved_constant_pool)).collect();
     let attributes_count = sr.get_u16();
-    let attributes: Vec<AttributeInfo> = (0..attributes_count)
-      .map(|_| AttributeInfo::read(sr, &resolved_constant_pool))
-      .collect();
+    let attributes: Vec<AttributeInfo> =
+      (0..attributes_count).map(|_| AttributeInfo::read(sr, &resolved_constant_pool)).collect();
     if !sr.done() {
       panic!("Extra bytes were found at the end of the classfile")
     }
@@ -81,14 +73,7 @@ impl ClassFile {
 
     (
       name.to_string(),
-      Self {
-        access_flags,
-        super_class,
-        interfaces,
-        fields,
-        methods,
-        attributes
-      },
+      Self { access_flags, super_class, interfaces, fields, methods, attributes },
       depends
     )
   }

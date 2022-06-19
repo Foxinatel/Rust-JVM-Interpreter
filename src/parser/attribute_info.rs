@@ -55,15 +55,8 @@ impl AttributeInfo {
         "BootstrapMethods" => bootstrap_methods::read(sr),
         _ => todo!()
       },
-      _ => panic!(
-        "Constant at index {} was not a valid Utf8 identifier",
-        attribute_name_index
-      )
+      _ => panic!("Constant at index {} was not a valid Utf8 identifier", attribute_name_index)
     };
-    Self {
-      attribute_name_index,
-      attribute_length,
-      attribute
-    }
+    Self { attribute_name_index, attribute_length, attribute }
   }
 }

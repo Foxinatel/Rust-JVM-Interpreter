@@ -6,9 +6,26 @@ use crate::parser::{
 };
 
 //TODO: Figure out how to properly manage references
-type Reference = Option<Rc<RefCell<Type>>>;
+// type Reference = Option<Rc<RefCell<Type>>>;
 
-#[derive(Debug, Clone, PartialEq)]
+type ReferenceT = Option<Rc<RefCell<Reference>>>;
+
+#[derive(Debug, PartialEq)]
+pub enum Reference {
+  Class(),
+  Interface(),
+
+  ArrayI(Vec<i32>),
+  ArrayL(Vec<i64>),
+  ArrayF(Vec<f32>),
+  ArrayD(Vec<f64>),
+  ArrayB(Vec<i8>),
+  ArrayC(Vec<u16>),
+  ArrayS(Vec<i16>),
+  ArrayA(Vec<ReferenceT>)
+}
+
+#[derive(Debug, Clone)]
 pub enum Type {
   //Primitives:
   Int(i32),
@@ -18,21 +35,23 @@ pub enum Type {
 
   ReturnAddress(usize),
 
-  Reference(Reference),
-  ArrayRefI(Option<Rc<RefCell<[i32]>>>),
-  ArrayRefL(Option<Rc<RefCell<[i64]>>>),
-  ArrayRefF(Option<Rc<RefCell<[f32]>>>),
-  ArrayRefD(Option<Rc<RefCell<[f64]>>>),
-  ArrayRefA(Option<Rc<RefCell<[Reference]>>>),
-  ArrayRefB(Option<Rc<RefCell<[i8]>>>),
-  ArrayRefC(Option<Rc<RefCell<[u16]>>>),
-  ArrayRefS(Option<Rc<RefCell<[i16]>>>)
+  Reference(ReferenceT)
 }
 
 // This macro chopped out so much bloat, thank god
 macro_rules! get_type {
   ($variant:ident, $val:expr) => {{
     let Type::$variant(value) = $val else {
+                      panic!("Found value {:?} which is not of type {}", $val, stringify!($variant))
+                    };
+    value
+  }};
+}
+
+macro_rules! get_reference {
+  ($variant:ident, $val:expr) => {{
+    let arrayref = get_type!(Reference, $val);
+    let Reference::$variant(value) = *(*arrayref.expect("NullPointerException")).borrow_mut() else {
                       panic!("Found value {:?} which is not of type {}", $val, stringify!($variant))
                     };
     value
@@ -65,10 +84,7 @@ impl JVM {
     let mut resolver = resolver::Resolver::new();
     resolver.resolved.insert(name.clone(), cf);
     resolver.resolve(depends);
-    Self {
-      entrypoint: name,
-      classes: resolver.resolved
-    }
+    Self { entrypoint: name, classes: resolver.resolved }
   }
 
   pub fn start(&self) { let _cf = self.classes.get(&self.entrypoint).unwrap(); }
@@ -76,13 +92,7 @@ impl JVM {
   //Should probably change this to use a MethodInfo
   fn evaluate(&self, code: ATTRIBUTE) -> Option<Type> {
     match code {
-      ATTRIBUTE::Code {
-        max_stack,
-        max_locals,
-        code,
-        exception_table: _,
-        attributes: _
-      } => {
+      ATTRIBUTE::Code { max_stack, max_locals, code, exception_table: _, attributes: _ } => {
         let mut pc = 0;
         let mut locals: Vec<Type> = Vec::with_capacity(max_locals as usize);
         let mut stack: Vec<Type> = Vec::with_capacity(max_stack as usize);
@@ -122,59 +132,43 @@ impl JVM {
             }
             Instructions::iaload => {
               let index = get_type!(Int, stack.pop().unwrap());
-              let arrayref = get_type!(ArrayRefI, stack.pop().unwrap());
-              stack.push(Type::Int(
-                (*arrayref.expect("NullPointerException")).borrow()[index as usize]
-              ))
+              let array = get_reference!(ArrayI, stack.pop().unwrap());
+              stack.push(Type::Int(array[index as usize]))
             }
             Instructions::laload => {
               let index = get_type!(Int, stack.pop().unwrap());
-              let arrayref = get_type!(ArrayRefL, stack.pop().unwrap());
-              stack.push(Type::Long(
-                (*arrayref.expect("NullPointerException")).borrow()[index as usize]
-              ))
+              let array = get_reference!(ArrayL, stack.pop().unwrap());
+              stack.push(Type::Long(array[index as usize]))
             }
             Instructions::faload => {
               let index = get_type!(Int, stack.pop().unwrap());
-              let arrayref = get_type!(ArrayRefF, stack.pop().unwrap());
-              stack.push(Type::Float(
-                (*arrayref.expect("NullPointerException")).borrow()[index as usize]
-              ))
+              let array = get_reference!(ArrayF, stack.pop().unwrap());
+              stack.push(Type::Float(array[index as usize]))
             }
             Instructions::daload => {
               let index = get_type!(Int, stack.pop().unwrap());
-              let arrayref = get_type!(ArrayRefD, stack.pop().unwrap());
-              stack.push(Type::Double(
-                (*arrayref.expect("NullPointerException")).borrow()[index as usize]
-              ))
+              let array = get_reference!(ArrayD, stack.pop().unwrap());
+              stack.push(Type::Double(array[index as usize]))
             }
             Instructions::aaload => {
               let index = get_type!(Int, stack.pop().unwrap());
-              let arrayref = get_type!(ArrayRefA, stack.pop().unwrap());
-              stack.push(Type::Reference(
-                (*arrayref.expect("NullPointerException")).borrow()[index as usize].clone()
-              ))
+              let array = get_reference!(ArrayA, stack.pop().unwrap());
+              stack.push(Type::Reference(array[index as usize].clone()))
             }
             Instructions::baload => {
               let index = get_type!(Int, stack.pop().unwrap());
-              let arrayref = get_type!(ArrayRefB, stack.pop().unwrap());
-              stack.push(Type::Int(
-                (*arrayref.expect("NullPointerException")).borrow()[index as usize] as i32
-              ))
+              let array = get_reference!(ArrayB, stack.pop().unwrap());
+              stack.push(Type::Int(array[index as usize] as i32))
             }
             Instructions::caload => {
               let index = get_type!(Int, stack.pop().unwrap());
-              let arrayref = get_type!(ArrayRefC, stack.pop().unwrap());
-              stack.push(Type::Int(
-                (*arrayref.expect("NullPointerException")).borrow()[index as usize] as u32 as i32
-              ))
+              let array = get_reference!(ArrayC, stack.pop().unwrap());
+              stack.push(Type::Int(array[index as usize] as i32))
             }
             Instructions::saload => {
               let index = get_type!(Int, stack.pop().unwrap());
-              let arrayref = get_type!(ArrayRefS, stack.pop().unwrap());
-              stack.push(Type::Int(
-                (*arrayref.expect("NullPointerException")).borrow()[index as usize] as i32
-              ))
+              let array = get_reference!(ArrayS, stack.pop().unwrap());
+              stack.push(Type::Int(array[index as usize] as i32))
             }
             Instructions::istore { index } => {
               let value = stack.pop().unwrap();
@@ -204,50 +198,50 @@ impl JVM {
             Instructions::iastore => {
               let value = get_type!(Int, stack.pop().unwrap());
               let index = get_type!(Int, stack.pop().unwrap());
-              let arrayref = get_type!(ArrayRefI, stack.pop().unwrap());
-              (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] = value
+              let mut array = get_reference!(ArrayI, stack.pop().unwrap());
+              array[index as usize] = value;
             }
             Instructions::lastore => {
               let value = get_type!(Long, stack.pop().unwrap());
               let index = get_type!(Int, stack.pop().unwrap());
-              let arrayref = get_type!(ArrayRefL, stack.pop().unwrap());
-              (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] = value
+              let mut array = get_reference!(ArrayL, stack.pop().unwrap());
+              array[index as usize] = value;
             }
             Instructions::fastore => {
               let value = get_type!(Float, stack.pop().unwrap());
               let index = get_type!(Int, stack.pop().unwrap());
-              let arrayref = get_type!(ArrayRefF, stack.pop().unwrap());
-              (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] = value
+              let mut array = get_reference!(ArrayF, stack.pop().unwrap());
+              array[index as usize] = value;
             }
             Instructions::dastore => {
               let value = get_type!(Double, stack.pop().unwrap());
               let index = get_type!(Int, stack.pop().unwrap());
-              let arrayref = get_type!(ArrayRefD, stack.pop().unwrap());
-              (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] = value
+              let mut array = get_reference!(ArrayD, stack.pop().unwrap());
+              array[index as usize] = value;
             }
             Instructions::aastore => {
               let value = get_type!(Reference, stack.pop().unwrap());
               let index = get_type!(Int, stack.pop().unwrap());
-              let arrayref = get_type!(ArrayRefA, stack.pop().unwrap());
-              (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] = value
+              let mut array = get_reference!(ArrayA, stack.pop().unwrap());
+              array[index as usize] = value;
             }
             Instructions::bastore => {
               let value = get_type!(Int, stack.pop().unwrap());
               let index = get_type!(Int, stack.pop().unwrap());
-              let arrayref = get_type!(ArrayRefB, stack.pop().unwrap());
-              (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] = value as i8
+              let mut array = get_reference!(ArrayB, stack.pop().unwrap());
+              array[index as usize] = value as i8;
             }
             Instructions::castore => {
               let value = get_type!(Int, stack.pop().unwrap());
               let index = get_type!(Int, stack.pop().unwrap());
-              let arrayref = get_type!(ArrayRefC, stack.pop().unwrap());
-              (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] = value as u16
+              let mut array = get_reference!(ArrayC, stack.pop().unwrap());
+              array[index as usize] = value as u16;
             }
             Instructions::sastore => {
               let value = get_type!(Int, stack.pop().unwrap());
               let index = get_type!(Int, stack.pop().unwrap());
-              let arrayref = get_type!(ArrayRefS, stack.pop().unwrap());
-              (*arrayref.expect("NullPointerException")).borrow_mut()[index as usize] = value as i16
+              let mut array = get_reference!(ArrayS, stack.pop().unwrap());
+              array[index as usize] = value as i16;
             }
             Instructions::pop => {
               stack.pop();
@@ -652,17 +646,8 @@ impl JVM {
             }
             Instructions::jsr { offset: _ } => todo!(),
             Instructions::ret { index: _ } => todo!(),
-            Instructions::tableswitch {
-              default: _,
-              low: _,
-              high: _,
-              offsets: _
-            } => todo!(),
-            Instructions::lookupswith {
-              default: _,
-              npairs: _,
-              pairs: _
-            } => todo!(),
+            Instructions::tableswitch { default: _, low: _, high: _, offsets: _ } => todo!(),
+            Instructions::lookupswith { default: _, npairs: _, pairs: _ } => todo!(),
             Instructions::ireturn => {
               let val = stack.pop().unwrap();
               assert_type!(Int, val);
@@ -707,19 +692,9 @@ impl JVM {
             Instructions::instanceof { index: _ } => todo!(),
             Instructions::monitorenter => todo!(),
             Instructions::monitorexit => todo!(),
-            Instructions::wide1 {
-              opcode: _,
-              index_extension: _
-            } => todo!(),
-            Instructions::wide2 {
-              opcode: _,
-              index_extension: _,
-              constbytes: _
-            } => todo!(),
-            Instructions::multianewarray {
-              index: _,
-              dimensions: _
-            } => todo!(),
+            Instructions::wide1 { opcode: _, index_extension: _ } => todo!(),
+            Instructions::wide2 { opcode: _, index_extension: _, constbytes: _ } => todo!(),
+            Instructions::multianewarray { index: _, dimensions: _ } => todo!(),
             Instructions::ifnull { offset: _ } => todo!(),
             Instructions::ifnonnull { offset: _ } => todo!(),
             Instructions::goto_w { offset: _ } => todo!(),

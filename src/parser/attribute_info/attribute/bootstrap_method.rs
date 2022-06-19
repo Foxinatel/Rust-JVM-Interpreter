@@ -12,9 +12,6 @@ impl BootstrapMethod {
     let num_bootstrap_arguments = sr.get_u16();
     let bootstrap_methods: Vec<u16> = (0..num_bootstrap_arguments).map(|_| sr.get_u16()).collect();
 
-    BootstrapMethod {
-      bootstrap_method_ref,
-      bootstrap_methods
-    }
+    BootstrapMethod { bootstrap_method_ref, bootstrap_methods }
   }
 }

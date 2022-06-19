@@ -24,12 +24,8 @@ impl VerificationTypeInfo {
       4 => VerificationTypeInfo::LongVariable,
       5 => VerificationTypeInfo::NullVariable,
       6 => VerificationTypeInfo::UninitializedThisVariable,
-      7 => VerificationTypeInfo::ObjectVariable {
-        cpool_index: sr.get_u16()
-      },
-      8 => VerificationTypeInfo::UninitializedVariable {
-        offset: sr.get_u16()
-      },
+      7 => VerificationTypeInfo::ObjectVariable { cpool_index: sr.get_u16() },
+      8 => VerificationTypeInfo::UninitializedVariable { offset: sr.get_u16() },
       _ => panic!("Invalid VarificationTypeInfo")
     }
   }

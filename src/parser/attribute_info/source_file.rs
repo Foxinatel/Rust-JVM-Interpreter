@@ -5,7 +5,5 @@ pub fn read(sr: &mut StreamReader, constant_pool: &Vec<ResolvedCpInfo>) -> ATTRI
   let sourcefile_index = sr.get_u16();
   let ResolvedCpInfo::Utf8 (sourcefile) = &constant_pool[sourcefile_index as usize - 1] else {panic!()};
 
-  ATTRIBUTE::SourceFile {
-    sourcefile: sourcefile.to_string()
-  }
+  ATTRIBUTE::SourceFile { sourcefile: sourcefile.to_string() }
 }

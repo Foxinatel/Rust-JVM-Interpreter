@@ -40,8 +40,5 @@ pub fn clean(mut initial: Vec<(usize, Instructions)>) -> Vec<Instructions> {
       _ => {}
     }
   }
-  initial
-    .iter()
-    .map(|val| val.1.clone())
-    .collect::<Vec<Instructions>>()
+  initial.iter().map(|val| val.1.clone()).collect::<Vec<Instructions>>()
 }

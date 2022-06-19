@@ -13,22 +13,14 @@ pub fn read(sr: &mut StreamReader, constant_pool: &Vec<ResolvedCpInfo>) -> ATTRI
   let max_locals = sr.get_u16();
   let code_length = sr.get_u32();
   let raw_code = sr.take_n(code_length as usize);
-  let tuple_code = generate_instructions(&mut StreamReader::from(raw_code));
+  let tuple_code = generate_instructions(&mut StreamReader::from(raw_code), constant_pool);
   let code = clean(tuple_code);
   let exception_table_length = sr.get_u16();
-  let exception_table: Vec<Exception> = (0..exception_table_length)
-    .map(|_| Exception::read(sr))
-    .collect();
+  let exception_table: Vec<Exception> =
+    (0..exception_table_length).map(|_| Exception::read(sr)).collect();
   let attributes_count = sr.get_u16();
-  let attributes: Vec<AttributeInfo> = (0..attributes_count)
-    .map(|_| AttributeInfo::read(sr, constant_pool))
-    .collect();
+  let attributes: Vec<AttributeInfo> =
+    (0..attributes_count).map(|_| AttributeInfo::read(sr, constant_pool)).collect();
 
-  ATTRIBUTE::Code {
-    max_stack,
-    max_locals,
-    code,
-    exception_table,
-    attributes
-  }
+  ATTRIBUTE::Code { max_stack, max_locals, code, exception_table, attributes }
 }

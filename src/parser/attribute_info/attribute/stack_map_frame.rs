@@ -54,35 +54,22 @@ impl StackMapFrame {
         offset_delta: sr.get_u16(),
         stack: [VerificationTypeInfo::read(sr)]
       },
-      (248..=250) => StackMapFrame::ChopFrame {
-        frame_type,
-        offset_delta: sr.get_u16()
-      },
-      251 => StackMapFrame::SameFrameExtended {
-        frame_type,
-        offset_delta: sr.get_u16()
-      },
+      (248..=250) => StackMapFrame::ChopFrame { frame_type, offset_delta: sr.get_u16() },
+      251 => StackMapFrame::SameFrameExtended { frame_type, offset_delta: sr.get_u16() },
       (252..=254) => {
         let offset_delta = sr.get_u16();
-        let locals: Vec<VerificationTypeInfo> = (0..frame_type - 251)
-          .map(|_| VerificationTypeInfo::read(sr))
-          .collect();
-        StackMapFrame::AppendFrame {
-          frame_type,
-          offset_delta,
-          locals
-        }
+        let locals: Vec<VerificationTypeInfo> =
+          (0..frame_type - 251).map(|_| VerificationTypeInfo::read(sr)).collect();
+        StackMapFrame::AppendFrame { frame_type, offset_delta, locals }
       }
       255 => {
         let offset_delta = sr.get_u16();
         let number_of_locals = sr.get_u16();
-        let locals: Vec<VerificationTypeInfo> = (0..number_of_locals)
-          .map(|_| VerificationTypeInfo::read(sr))
-          .collect();
+        let locals: Vec<VerificationTypeInfo> =
+          (0..number_of_locals).map(|_| VerificationTypeInfo::read(sr)).collect();
         let number_of_stack_items = sr.get_u16();
-        let stack: Vec<VerificationTypeInfo> = (0..number_of_stack_items)
-          .map(|_| VerificationTypeInfo::read(sr))
-          .collect();
+        let stack: Vec<VerificationTypeInfo> =
+          (0..number_of_stack_items).map(|_| VerificationTypeInfo::read(sr)).collect();
         StackMapFrame::FullFrame {
           frame_type,
           offset_delta,
