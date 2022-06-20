@@ -1,4 +1,4 @@
-use super::attribute::{bootstrap_method::BootstrapMethod, Attribute};
+use super::{attribute::{bootstrap_method::BootstrapMethod}, Attribute};
 use crate::stream_reader::StreamReader;
 
 pub fn read(sr: &mut StreamReader) -> Attribute {

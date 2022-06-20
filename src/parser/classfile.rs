@@ -1,11 +1,10 @@
-use std::{collections::HashMap, fs, rc::Rc};
+use std::{collections::HashMap, fs};
 
 use super::{
-  attribute_info::attribute::Attribute,
   cp_info::CpInfo,
   cp_info_resolved::ResolvedCpInfo,
   field_info::FieldInfo,
-  method_info::MethodInfo
+  method_info::MethodInfo, attribute_info::Attribute
 };
 use crate::stream_reader::StreamReader;
 

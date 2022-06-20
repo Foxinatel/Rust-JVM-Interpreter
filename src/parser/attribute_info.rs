@@ -1,6 +1,5 @@
-use std::rc::Rc;
+use self::{code::code_generator::Instructions, attribute::{exception::Exception, stack_map_frame::StackMapFrame, classes::Classes, line_number::LineNumber, local_variable::LocalVariable, local_variable_type::LocalVariableType, annotation::Annotation, parameter_annotation::ParameterAnnotation, element_value::ElementValue, bootstrap_method::BootstrapMethod}};
 
-use self::attribute::Attribute;
 use super::cp_info_resolved::ResolvedCpInfo;
 use crate::stream_reader::StreamReader;
 
@@ -21,6 +20,76 @@ pub mod signature;
 pub mod source_debug_extensions;
 pub mod source_file;
 pub mod stack_map_table;
+
+
+
+#[derive(Debug)]
+pub enum Attribute {
+  ConstantValue {
+    // TODO!
+    constantvalue_index: u16
+  },
+  Code {
+    max_stack: u16,
+    max_locals: u16,
+    code: Vec<Instructions>,
+    exception_table: Vec<Exception>,
+    attributes: Vec<Attribute>
+  },
+  StackMapTable {
+    entries: Vec<StackMapFrame>
+  },
+  Exceptions {
+    exception_index_table: Vec<u16>
+  },
+  InnerClasses {
+    classes: Vec<Classes>
+  },
+  EnclosingMethod {
+    class_index: u16,
+    method_index: u16
+  },
+  Synthetic,
+  Signature {
+    signature: String
+  },
+  SourceFile {
+    sourcefile: String
+  },
+  SourceDebugExtension {
+    debug_extension: Vec<u8>
+  },
+  LineNumberTable {
+    line_number_table: Vec<LineNumber>
+  },
+  LocalVariableTable {
+    local_variable_table: Vec<LocalVariable>
+  },
+  LocalVariableTypeTable {
+    local_variable_type_table: Vec<LocalVariableType>
+  },
+  Deprecated,
+  RuntimeVisibleAnnotations {
+    annotations: Vec<Annotation>
+  },
+  RuntimeInvisibleAnnotations {
+    annotations: Vec<Annotation>
+  },
+  RuntimeVisibleParameterAnnotations {
+    parameter_annotations: Vec<ParameterAnnotation>
+  },
+  RuntimeInvisibleParameterAnnotations {
+    parameter_annotations: Vec<ParameterAnnotation>
+  },
+  AnnotationDefault {
+    attribute_name: String,
+    attribute_length: u32,
+    default_value: ElementValue
+  },
+  BootstrapMethods {
+    bootstrap_methods: Vec<BootstrapMethod>
+  }
+}
 
 impl Attribute {
   pub fn read(sr: &mut StreamReader, constant_pool: &Vec<ResolvedCpInfo>) -> Attribute {

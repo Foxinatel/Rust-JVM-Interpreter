@@ -1,10 +1,10 @@
-use std::{collections::{HashMap, BTreeMap}, hash::Hash};
+use std::{collections::{HashMap}};
 
 use self::{
   clean_jumps::clean,
   code_generator::{generate_instructions, Instructions}
 };
-use super::attribute::{exception::Exception, Attribute};
+use super::{attribute::{exception::Exception}, Attribute};
 use crate::{parser::cp_info_resolved::ResolvedCpInfo, stream_reader::StreamReader};
 
 pub mod clean_jumps;

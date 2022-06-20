@@ -1,4 +1,4 @@
-use super::attribute::{local_variable_type::LocalVariableType, Attribute};
+use super::{attribute::{local_variable_type::LocalVariableType}, Attribute};
 use crate::stream_reader::StreamReader;
 
 pub fn read(sr: &mut StreamReader) -> Attribute {

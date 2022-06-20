@@ -1,12 +1,9 @@
 use std::{cell::RefCell, collections::HashMap, env, path::Path, rc::Rc};
 
 use crate::parser::{
-  attribute_info::{attribute::Attribute, code::code_generator::Instructions},
+  attribute_info::{code::code_generator::Instructions, Attribute},
   classfile::ClassFile
 };
-
-//TODO: Figure out how to properly manage references
-// type Reference = Option<Rc<RefCell<Type>>>;
 
 type ReferenceT = Option<Rc<RefCell<Reference>>>;
 
@@ -712,19 +709,19 @@ impl JVM {
               return Some(val);
             }
             Instructions::r#return => return None,
-            Instructions::getstatic { fieldref } => todo!(),
+            Instructions::getstatic { fieldref: _ } => todo!(),
             Instructions::putstatic { fieldref } => {
               let class = self.classes.get(&fieldref.class.to_string()).unwrap();
-              let field = class.fields.get(&fieldref.name_and_type.to_string()).unwrap();
-            }
-            Instructions::getfield { fieldref } => todo!(),
-            Instructions::putfield { fieldref } => todo!(),
-            Instructions::invokevirtual { methodref } => todo!(),
-            Instructions::invokespecial { methodref } => todo!(),
-            Instructions::invokestatic { methodref } => todo!(),
-            Instructions::invokeinterface { interfacemethodref, count } => todo!(),
-            Instructions::invokedynamic { invokedynamic } => todo!(),
-            Instructions::new { class } => todo!(),
+              let _field = class.fields.get(&fieldref.name_and_type.to_string()).unwrap();
+            },
+            Instructions::getfield { fieldref: _ } => todo!(),
+            Instructions::putfield { fieldref: _ } => todo!(),
+            Instructions::invokevirtual { methodref: _ } => todo!(),
+            Instructions::invokespecial { methodref: _ } => todo!(),
+            Instructions::invokestatic { methodref: _ } => todo!(),
+            Instructions::invokeinterface { interfacemethodref: _, count: _ } => todo!(),
+            Instructions::invokedynamic { invokedynamic: _ } => todo!(),
+            Instructions::new { class: _ } => todo!(),
             Instructions::newarray { atype: _ } => todo!(),
             Instructions::anewarray { index: _ } => todo!(),
             Instructions::arraylength => todo!(),
