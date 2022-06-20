@@ -712,16 +712,19 @@ impl JVM {
               return Some(val);
             }
             Instructions::r#return => return None,
-            Instructions::getstatic { index: _ } => todo!(),
-            Instructions::putstatic { index: _ } => todo!(),
-            Instructions::getfield { index: _ } => todo!(),
-            Instructions::putfield { index: _ } => todo!(),
-            Instructions::invokevirtual { index: _ } => todo!(),
-            Instructions::invokespecial { index: _ } => todo!(),
-            Instructions::invokestatic { index: _ } => todo!(),
-            Instructions::invokeinterface { index: _, count: _ } => todo!(),
-            Instructions::invokedynamic { index: _ } => todo!(),
-            Instructions::new { index: _ } => todo!(),
+            Instructions::getstatic { fieldref } => todo!(),
+            Instructions::putstatic { fieldref } => {
+              let class = self.classes.get(&fieldref.class.to_string()).unwrap();
+              let field = class.fields.get(&fieldref.name_and_type.to_string()).unwrap();
+            }
+            Instructions::getfield { fieldref } => todo!(),
+            Instructions::putfield { fieldref } => todo!(),
+            Instructions::invokevirtual { methodref } => todo!(),
+            Instructions::invokespecial { methodref } => todo!(),
+            Instructions::invokestatic { methodref } => todo!(),
+            Instructions::invokeinterface { interfacemethodref, count } => todo!(),
+            Instructions::invokedynamic { invokedynamic } => todo!(),
+            Instructions::new { class } => todo!(),
             Instructions::newarray { atype: _ } => todo!(),
             Instructions::anewarray { index: _ } => todo!(),
             Instructions::arraylength => todo!(),

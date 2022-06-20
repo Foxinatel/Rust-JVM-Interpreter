@@ -1,56 +1,82 @@
+use std::rc::Rc;
+
 use super::{attribute_info::attribute::bootstrap_method::BootstrapMethod, cp_info::CpInfo};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Class {
   pub name: String
 }
 
-#[derive(Debug)]
+impl ToString for Class {
+  fn to_string(&self) -> String { self.name.to_string() }
+}
+
+#[derive(Debug, Clone)]
 pub struct NameAndType {
   pub name: String,
   pub descriptor: String
 }
 
-#[derive(Debug)]
+impl ToString for NameAndType {
+  fn to_string(&self) -> String { format!("{}:{}", self.name, self.descriptor) }
+}
+
+#[derive(Debug, Clone)]
 pub struct JavaString {
   pub string: String
 }
 
-#[derive(Debug)]
+impl ToString for JavaString {
+  fn to_string(&self) -> String { self.string.to_string() }
+}
+
+#[derive(Debug, Clone)]
 pub struct Fieldref {
   pub class: Class,
   pub name_and_type: NameAndType
 }
 
-#[derive(Debug)]
+impl ToString for Fieldref {
+  fn to_string(&self) -> String {
+    format!("{}.{}", self.class.to_string(), self.name_and_type.to_string())
+  }
+}
+
+#[derive(Debug, Clone)]
 pub struct Methodref {
   pub class: Class,
   pub name_and_type: NameAndType
 }
 
-#[derive(Debug)]
+impl ToString for Methodref {
+  fn to_string(&self) -> String {
+    format!("{}.{}", self.class.to_string(), self.name_and_type.to_string())
+  }
+}
+
+#[derive(Debug, Clone)]
 pub struct InterfaceMethodref {
   pub class: Class,
   pub name_and_type: NameAndType
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MethodHandle {
   //TODO
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MethodType {
   pub descriptor: String
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct InvokeDynamic {
   pub bootstrap_method_attr: BootstrapMethod,
   pub name_and_type: NameAndType
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ResolvedCpInfo {
   Class(Class),
   Fieldref(Fieldref),
@@ -118,10 +144,10 @@ impl ResolvedCpInfo {
         let CpInfo::Utf8 { bytes: string } = &constant_pool[*string_index as usize -1] else {panic!()};
         ResolvedCpInfo::String(JavaString { string: string.clone() })
       }
-      CpInfo::Integer { bytes } => todo!(),
-      CpInfo::Float { bytes } => todo!(),
-      CpInfo::Long { high_bytes, low_bytes } => todo!(),
-      CpInfo::Double { high_bytes, low_bytes } => todo!(),
+      CpInfo::Integer { bytes: _ } => todo!(),
+      CpInfo::Float { bytes: _ } => todo!(),
+      CpInfo::Long { high_bytes: _, low_bytes: _ } => todo!(),
+      CpInfo::Double { high_bytes: _, low_bytes: _ } => todo!(),
       CpInfo::NameAndType { name_index, descriptor_index } => {
         let CpInfo::Utf8 { bytes: name } = &constant_pool[*name_index as usize -1] else {panic!()};
         let CpInfo::Utf8 { bytes: descriptor } = &constant_pool[*descriptor_index as usize -1] else {panic!()};
@@ -131,9 +157,9 @@ impl ResolvedCpInfo {
         })
       }
       CpInfo::Utf8 { bytes } => ResolvedCpInfo::Utf8(bytes.to_string()),
-      CpInfo::MethodHandle { reference_kind, reference_index } => todo!(),
-      CpInfo::MethodType { descriptor_index } => todo!(),
-      CpInfo::InvokeDynamic { bootstrap_method_attr_index, reference_index } => todo!()
+      CpInfo::MethodHandle { reference_kind: _, reference_index: _ } => todo!(),
+      CpInfo::MethodType { descriptor_index: _ } => todo!(),
+      CpInfo::InvokeDynamic { bootstrap_method_attr_index: _, reference_index: _ } => todo!()
     }
   }
 }

@@ -1,4 +1,14 @@
-use crate::{parser::cp_info_resolved::ResolvedCpInfo, stream_reader::StreamReader};
+use crate::{
+  parser::cp_info_resolved::{
+    Class,
+    Fieldref,
+    InterfaceMethodref,
+    InvokeDynamic,
+    Methodref,
+    ResolvedCpInfo
+  },
+  stream_reader::StreamReader
+};
 
 #[derive(Debug, Clone)]
 #[allow(non_camel_case_types)]
@@ -131,16 +141,16 @@ pub enum Instructions {
   dreturn,
   areturn,
   r#return,
-  getstatic { index: u16 },
-  putstatic { index: u16 },
-  getfield { index: u16 },
-  putfield { index: u16 },
-  invokevirtual { index: u16 },
-  invokespecial { index: u16 },
-  invokestatic { index: u16 },
-  invokeinterface { index: u16, count: u8 },
-  invokedynamic { index: u16 },
-  new { index: u16 },
+  getstatic { fieldref: Fieldref },
+  putstatic { fieldref: Fieldref },
+  getfield { fieldref: Fieldref },
+  putfield { fieldref: Fieldref },
+  invokevirtual { methodref: Methodref },
+  invokespecial { methodref: Methodref },
+  invokestatic { methodref: Methodref },
+  invokeinterface { interfacemethodref: InterfaceMethodref, count: u8 },
+  invokedynamic { invokedynamic: InvokeDynamic },
+  new { class: Class },
   newarray { atype: u8 },
   anewarray { index: u16 },
   arraylength,
@@ -161,14 +171,14 @@ pub enum Instructions {
 pub fn generate_instructions(
   sr: &mut StreamReader,
   constant_pool: &Vec<ResolvedCpInfo>
-) -> Vec<(usize, Instructions)> {
-  let mut instructions = Vec::new();
-  loop {
+) -> Vec<(usize, (usize, Instructions))> {
+  let mut instructions: Vec<(usize, (usize, Instructions))> = Vec::new();
+  for i in 0.. {
     if sr.done() {
       return instructions;
     }
     let inst = sr.get_u8();
-    instructions.push((sr.ptr, match inst {
+    instructions.push((sr.ptr, (i, match inst {
       0 => Instructions::nop,
       1 => Instructions::aconst_null,
       (2..=8) => Instructions::iconst { value: inst as i32 - 3 },
@@ -318,25 +328,61 @@ pub fn generate_instructions(
       175 => Instructions::dreturn,
       176 => Instructions::areturn,
       177 => Instructions::r#return,
-      178 => Instructions::getstatic { index: sr.get_u16() },
-      179 => Instructions::putstatic { index: sr.get_u16() },
-      180 => Instructions::getfield { index: sr.get_u16() },
-      181 => Instructions::putfield { index: sr.get_u16() },
-      182 => Instructions::invokevirtual { index: sr.get_u16() },
-      183 => Instructions::invokespecial { index: sr.get_u16() },
-      184 => Instructions::invokestatic { index: sr.get_u16() },
+      178 => {
+        let index = sr.get_u16();
+        let ResolvedCpInfo::Fieldref(fieldref) = &constant_pool[index as usize - 1] else {panic!()};
+        Instructions::getstatic { fieldref: fieldref.clone() }
+      }
+      179 => {
+        let index = sr.get_u16();
+        let ResolvedCpInfo::Fieldref(fieldref) = &constant_pool[index as usize - 1] else {panic!()};
+        Instructions::putstatic { fieldref: fieldref.clone() }
+      }
+      180 => {
+        let index = sr.get_u16();
+        let ResolvedCpInfo::Fieldref(fieldref) = &constant_pool[index as usize - 1] else {panic!()};
+        Instructions::getfield { fieldref: fieldref.clone() }
+      }
+      181 => {
+        let index = sr.get_u16();
+        let ResolvedCpInfo::Fieldref(fieldref) = &constant_pool[index as usize - 1] else {panic!()};
+        Instructions::putfield { fieldref: fieldref.clone() }
+      }
+      182 => {
+        let index = sr.get_u16();
+        let ResolvedCpInfo::Methodref(methodref) = &constant_pool[index as usize - 1] else {panic!()};
+        Instructions::invokevirtual { methodref: methodref.clone() }
+      }
+      183 => {
+        let index = sr.get_u16();
+        let ResolvedCpInfo::Methodref(methodref) = &constant_pool[index as usize - 1] else {panic!()};
+        Instructions::invokespecial { methodref: methodref.clone() }
+      }
+      184 => {
+        let index = sr.get_u16();
+        let ResolvedCpInfo::Methodref(methodref) = &constant_pool[index as usize - 1] else {panic!()};
+        Instructions::invokestatic { methodref: methodref.clone() }
+      }
       185 => {
         let index = sr.get_u16();
         let count = sr.get_u8();
         assert_eq!(sr.get_u8(), 0, "Final byte of invokestatic was non-zero");
-        Instructions::invokeinterface { index, count }
+
+        let ResolvedCpInfo::InterfaceMethodref(interfacemethodref) = &constant_pool[index as usize - 1] else {panic!()};
+        Instructions::invokeinterface { interfacemethodref: interfacemethodref.clone(), count}
       }
       186 => {
         let index = sr.get_u16();
         assert_eq!(sr.get_u16(), 0, "Final bytes of invokedynamic was non-zero");
-        Instructions::invokedynamic { index }
+
+        let ResolvedCpInfo::InvokeDynamic(invokedynamic) = &constant_pool[index as usize - 1] else {panic!()};
+        Instructions::invokedynamic { invokedynamic: invokedynamic.clone() }
       }
-      187 => Instructions::new { index: sr.get_u16() },
+      187 => {
+        let index = sr.get_u16();
+        let ResolvedCpInfo::Class(class) = &constant_pool[index as usize - 1] else {panic!()};
+        Instructions::new { class: class.clone() }
+      }
       188 => Instructions::newarray { atype: sr.get_u8() },
       189 => Instructions::anewarray { index: sr.get_u16() },
       190 => Instructions::arraylength,
@@ -363,6 +409,7 @@ pub fn generate_instructions(
       200 => Instructions::goto_w { offset: sr.get_i32() },
       201 => Instructions::jsr_w { offset: sr.get_i32() },
       (202..) => panic!("Instruction not yet implemented")
-    }));
+    })));
   }
+  instructions //technically, this should never be reached. It's just here to hint the return type to the compiler
 }

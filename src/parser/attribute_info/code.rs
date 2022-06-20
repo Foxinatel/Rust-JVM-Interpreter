@@ -1,4 +1,9 @@
-use self::{clean_jumps::clean, code_generator::generate_instructions};
+use std::{collections::{HashMap, BTreeMap}, hash::Hash};
+
+use self::{
+  clean_jumps::clean,
+  code_generator::{generate_instructions, Instructions}
+};
 use super::attribute::{exception::Exception, Attribute};
 use crate::{parser::cp_info_resolved::ResolvedCpInfo, stream_reader::StreamReader};
 
@@ -10,7 +15,8 @@ pub fn read(sr: &mut StreamReader, constant_pool: &Vec<ResolvedCpInfo>) -> Attri
   let max_locals = sr.get_u16();
   let code_length = sr.get_u32();
   let raw_code = sr.take_n(code_length as usize);
-  let tuple_code = generate_instructions(&mut StreamReader::from(raw_code), constant_pool);
+  let tuple_code: HashMap<usize, (usize, Instructions)> =
+    generate_instructions(&mut StreamReader::from(raw_code), constant_pool).into_iter().collect();
   let code = clean(tuple_code);
   let exception_table_length = sr.get_u16();
   let exception_table: Vec<Exception> =
