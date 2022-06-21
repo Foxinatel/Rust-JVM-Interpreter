@@ -1,6 +1,6 @@
 use crate::stream_reader::StreamReader;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Exception {
   pub start_pc: u16,
   pub end_pc: u16,

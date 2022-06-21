@@ -1,6 +1,10 @@
-use super::{attribute_info::Attribute, cp_info_resolved::{ResolvedCpInfo, NameAndType}};
-use crate::stream_reader::StreamReader;
 use bitmask::bitmask;
+
+use super::{
+  attribute_info::Attribute,
+  cp_info_resolved::{NameAndType, ResolvedCpInfo}
+};
+use crate::stream_reader::StreamReader;
 
 bitmask! {
   #[derive(Debug)]
@@ -20,7 +24,7 @@ bitmask! {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MethodInfo {
   pub access_flags: MethodAccessFlags,
   pub attributes: Vec<Attribute>
@@ -41,6 +45,9 @@ impl MethodInfo {
     let attributes: Vec<Attribute> =
       (0..attributes_count).map(|_| Attribute::read(sr, &constant_pool)).collect();
 
-    (NameAndType{ name: name.to_string(), descriptor: descriptor.to_string() }.to_string(), Self { access_flags, attributes })
+    (NameAndType { name: name.to_string(), descriptor: descriptor.to_string() }.to_string(), Self {
+      access_flags,
+      attributes
+    })
   }
 }

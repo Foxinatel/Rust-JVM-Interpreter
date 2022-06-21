@@ -1,7 +1,7 @@
 use super::element_value::ElementValue;
 use crate::stream_reader::StreamReader;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Annotation {
   pub type_index: u16,
   pub element_value_pairs: Vec<(u16, ElementValue)>

@@ -1,6 +1,6 @@
 use crate::stream_reader::StreamReader;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum VerificationTypeInfo {
   TopVariable,
   IntegerVariable,

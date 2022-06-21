@@ -3,7 +3,7 @@ use crate::stream_reader::StreamReader;
 
 mod verification_type_info;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum StackMapFrame {
   SameFrame {
     frame_type: u8

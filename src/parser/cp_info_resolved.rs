@@ -142,10 +142,10 @@ impl ResolvedCpInfo {
         let CpInfo::Utf8 { bytes: string } = &constant_pool[*string_index as usize -1] else {panic!()};
         ResolvedCpInfo::String(JavaString { string: string.clone() })
       }
-      CpInfo::Integer { bytes: _ } => todo!(),
-      CpInfo::Float { bytes: _ } => todo!(),
-      CpInfo::Long { high_bytes: _, low_bytes: _ } => todo!(),
-      CpInfo::Double { high_bytes: _, low_bytes: _ } => todo!(),
+      CpInfo::Integer { value } => ResolvedCpInfo::Integer(*value),
+      CpInfo::Float { value } => ResolvedCpInfo::Float(*value),
+      CpInfo::Long { value } => ResolvedCpInfo::Long(*value),
+      CpInfo::Double { value } => ResolvedCpInfo::Double(*value),
       CpInfo::NameAndType { name_index, descriptor_index } => {
         let CpInfo::Utf8 { bytes: name } = &constant_pool[*name_index as usize -1] else {panic!()};
         let CpInfo::Utf8 { bytes: descriptor } = &constant_pool[*descriptor_index as usize -1] else {panic!()};

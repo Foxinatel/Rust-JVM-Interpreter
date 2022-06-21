@@ -7,10 +7,14 @@ pub enum CpInfo {
   Methodref { class_index: u16, name_and_type_index: u16 },
   InterfaceMethodref { class_index: u16, name_and_type_index: u16 },
   String { string_index: u16 },
-  Integer { bytes: u32 },
-  Float { bytes: u32 },
-  Long { high_bytes: u32, low_bytes: u32 },
-  Double { high_bytes: u32, low_bytes: u32 },
+  // Integer { bytes: u32 },
+  // Float { bytes: u32 },
+  // Long { high_bytes: u32, low_bytes: u32 },
+  // Double { high_bytes: u32, low_bytes: u32 },
+  Integer { value: i32 },
+  Float { value: f32 },
+  Long { value: i64 },
+  Double { value: f64 },
   NameAndType { name_index: u16, descriptor_index: u16 },
   Utf8 { bytes: String },
   MethodHandle { reference_kind: u8, reference_index: u16 },
@@ -29,10 +33,10 @@ impl CpInfo {
         CpInfo::InterfaceMethodref { class_index: sr.get_u16(), name_and_type_index: sr.get_u16() }
       }
       8 => CpInfo::String { string_index: sr.get_u16() },
-      3 => CpInfo::Integer { bytes: sr.get_u32() },
-      4 => CpInfo::Float { bytes: sr.get_u32() },
-      5 => CpInfo::Long { high_bytes: sr.get_u32(), low_bytes: sr.get_u32() },
-      6 => CpInfo::Double { high_bytes: sr.get_u32(), low_bytes: sr.get_u32() },
+      3 => CpInfo::Integer { value: sr.get_i32() },
+      4 => CpInfo::Float { value: sr.get_f32() },
+      5 => CpInfo::Long { value: sr.get_i64() },
+      6 => CpInfo::Double { value: sr.get_f64() },
       12 => CpInfo::NameAndType { name_index: sr.get_u16(), descriptor_index: sr.get_u16() },
       1 => {
         let length = sr.get_u16();

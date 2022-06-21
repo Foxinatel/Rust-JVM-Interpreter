@@ -29,6 +29,36 @@ impl StreamReader {
     u32::from_be_bytes([self.next(), self.next(), self.next(), self.next()])
   }
 
+  pub fn get_i64(&mut self) -> i64 {
+    i64::from_be_bytes([
+      self.next(),
+      self.next(),
+      self.next(),
+      self.next(),
+      self.next(),
+      self.next(),
+      self.next(),
+      self.next()
+    ])
+  }
+
+  pub fn get_f32(&mut self) -> f32 {
+    f32::from_be_bytes([self.next(), self.next(), self.next(), self.next()])
+  }
+
+  pub fn get_f64(&mut self) -> f64 {
+    f64::from_be_bytes([
+      self.next(),
+      self.next(),
+      self.next(),
+      self.next(),
+      self.next(),
+      self.next(),
+      self.next(),
+      self.next()
+    ])
+  }
+
   pub fn take_n(&mut self, n: usize) -> Vec<u8> {
     let ret = self.stream[self.ptr..n + self.ptr].to_vec();
     self.ptr += n;

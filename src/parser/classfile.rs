@@ -1,7 +1,11 @@
 use std::{
+  cell::RefCell,
   collections::{HashMap, HashSet},
-  fs
+  fs,
+  rc::Rc
 };
+
+use bitmask::bitmask;
 
 use super::{
   attribute_info::Attribute,
@@ -11,7 +15,6 @@ use super::{
   method_info::MethodInfo
 };
 use crate::stream_reader::StreamReader;
-use bitmask::bitmask;
 
 bitmask! {
   #[derive(Debug)]
@@ -28,7 +31,7 @@ bitmask! {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ClassFile {
   pub access_flags: ClassAccessFlags,
   pub super_class: Class,

@@ -34,7 +34,7 @@ pub mod source_debug_extensions;
 pub mod source_file;
 pub mod stack_map_table;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Attribute {
   ConstantValue {
     // TODO!
@@ -128,7 +128,7 @@ impl Attribute {
         "RuntimeInvisibleParameterAnnotations" => runtime_parameter_annotations::read::<false>(sr),
         "AnnotationDefault" => annotation_default::read(sr, constant_pool),
         "BootstrapMethods" => bootstrap_methods::read(sr),
-        _ => todo!()
+        _ => todo!("No support for custom attributes yet")
       },
       _ => panic!("Constant at index {} was not a valid Utf8 identifier", attribute_name_index)
     }

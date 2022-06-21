@@ -1,7 +1,7 @@
 use super::annotation::Annotation;
 use crate::stream_reader::StreamReader;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ParameterAnnotation {
   pub num_annotations: u16,
   pub annotations: Vec<Annotation>

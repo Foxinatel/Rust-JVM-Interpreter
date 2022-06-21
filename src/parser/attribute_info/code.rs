@@ -1,4 +1,4 @@
-use std::collections::{HashMap, BTreeMap};
+use std::collections::BTreeMap;
 
 use self::{
   clean_jumps::clean,

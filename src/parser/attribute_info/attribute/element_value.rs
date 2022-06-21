@@ -1,7 +1,7 @@
 use super::annotation::Annotation;
 use crate::stream_reader::StreamReader;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ElementValues {
   ConstValueIndex(u16),
   EnumConstValue { type_name_index: u16, const_name_index: u16 },
@@ -10,7 +10,7 @@ pub enum ElementValues {
   ArrayValue { num_values: u16, values: Vec<ElementValue> }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ElementValue {
   pub tag: u8,
   pub value: ElementValues
