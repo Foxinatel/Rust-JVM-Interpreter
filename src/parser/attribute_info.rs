@@ -1,5 +1,18 @@
-use self::{code::code_generator::Instructions, attribute::{exception::Exception, stack_map_frame::StackMapFrame, classes::Classes, line_number::LineNumber, local_variable::LocalVariable, local_variable_type::LocalVariableType, annotation::Annotation, parameter_annotation::ParameterAnnotation, element_value::ElementValue, bootstrap_method::BootstrapMethod}};
-
+use self::{
+  attribute::{
+    annotation::Annotation,
+    bootstrap_method::BootstrapMethod,
+    classes::Classes,
+    element_value::ElementValue,
+    exception::Exception,
+    line_number::LineNumber,
+    local_variable::LocalVariable,
+    local_variable_type::LocalVariableType,
+    parameter_annotation::ParameterAnnotation,
+    stack_map_frame::StackMapFrame
+  },
+  code::code_generator::Instructions
+};
 use super::cp_info_resolved::ResolvedCpInfo;
 use crate::stream_reader::StreamReader;
 
@@ -20,8 +33,6 @@ pub mod signature;
 pub mod source_debug_extensions;
 pub mod source_file;
 pub mod stack_map_table;
-
-
 
 #[derive(Debug)]
 pub enum Attribute {

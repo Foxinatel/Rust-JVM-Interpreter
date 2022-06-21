@@ -713,7 +713,7 @@ impl JVM {
             Instructions::putstatic { fieldref } => {
               let class = self.classes.get(&fieldref.class.to_string()).unwrap();
               let _field = class.fields.get(&fieldref.name_and_type.to_string()).unwrap();
-            },
+            }
             Instructions::getfield { fieldref: _ } => todo!(),
             Instructions::putfield { fieldref: _ } => todo!(),
             Instructions::invokevirtual { methodref: _ } => todo!(),

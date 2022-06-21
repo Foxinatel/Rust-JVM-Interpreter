@@ -1,4 +1,4 @@
-use super::{attribute::{stack_map_frame::StackMapFrame}, Attribute};
+use super::{attribute::stack_map_frame::StackMapFrame, Attribute};
 use crate::stream_reader::StreamReader;
 
 pub fn read(sr: &mut StreamReader) -> Attribute {

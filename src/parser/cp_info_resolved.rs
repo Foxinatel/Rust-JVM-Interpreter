@@ -1,5 +1,3 @@
-
-
 use super::{attribute_info::attribute::bootstrap_method::BootstrapMethod, cp_info::CpInfo};
 
 #[derive(Debug, Clone)]

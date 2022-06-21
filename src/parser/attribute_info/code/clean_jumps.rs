@@ -1,8 +1,8 @@
-use std::collections::{HashMap};
+use std::collections::{HashMap, BTreeMap};
 
 use super::code_generator::Instructions;
 
-pub fn clean(map: HashMap<usize, (usize, Instructions)>) -> Vec<Instructions> {
+pub fn clean(map: BTreeMap<usize, (usize, Instructions)>) -> Vec<Instructions> {
   for (bytepos, (instpos, instruction)) in map.clone().iter_mut() {
     match instruction {
       Instructions::ifeq { offset }

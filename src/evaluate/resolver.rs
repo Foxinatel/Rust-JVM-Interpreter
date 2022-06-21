@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use crate::parser::classfile::ClassFile;
 
@@ -9,7 +9,7 @@ pub struct Resolver {
 impl Resolver {
   pub fn new() -> Self { Self { resolved: HashMap::new() } }
 
-  pub fn resolve(&mut self, depends: Vec<String>) {
+  pub fn resolve(&mut self, depends: HashSet<String>) {
     for module in depends {
       if module == "java/lang/Object" || self.resolved.contains_key(&module) {
         continue;

@@ -1,6 +1,5 @@
-use crate::stream_reader::StreamReader;
-
 use super::annotation::Annotation;
+use crate::stream_reader::StreamReader;
 
 #[derive(Debug)]
 pub enum ElementValues {

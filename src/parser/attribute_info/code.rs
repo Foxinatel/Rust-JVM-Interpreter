@@ -1,10 +1,10 @@
-use std::{collections::{HashMap}};
+use std::collections::{HashMap, BTreeMap};
 
 use self::{
   clean_jumps::clean,
   code_generator::{generate_instructions, Instructions}
 };
-use super::{attribute::{exception::Exception}, Attribute};
+use super::{attribute::exception::Exception, Attribute};
 use crate::{parser::cp_info_resolved::ResolvedCpInfo, stream_reader::StreamReader};
 
 pub mod clean_jumps;
@@ -15,7 +15,7 @@ pub fn read(sr: &mut StreamReader, constant_pool: &Vec<ResolvedCpInfo>) -> Attri
   let max_locals = sr.get_u16();
   let code_length = sr.get_u32();
   let raw_code = sr.take_n(code_length as usize);
-  let tuple_code: HashMap<usize, (usize, Instructions)> =
+  let tuple_code: BTreeMap<usize, (usize, Instructions)> =
     generate_instructions(&mut StreamReader::from(raw_code), constant_pool).into_iter().collect();
   let code = clean(tuple_code);
   let exception_table_length = sr.get_u16();

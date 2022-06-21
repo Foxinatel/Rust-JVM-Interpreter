@@ -1,4 +1,4 @@
-use super::{attribute::{line_number::LineNumber}, Attribute};
+use super::{attribute::line_number::LineNumber, Attribute};
 use crate::stream_reader::StreamReader;
 
 pub fn read(sr: &mut StreamReader) -> Attribute {
