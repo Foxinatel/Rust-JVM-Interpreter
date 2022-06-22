@@ -1,7 +1,10 @@
 use std::{cell::RefCell, collections::HashMap, env, path::Path, rc::Rc};
 
-use self::{static_class::ClassStatics, dynamic_class::ClassDynamics};
-use crate::parser::{classfile::ClassFile, attribute_info::{Attribute, code::code_generator::Instructions}};
+use self::{dynamic_class::ClassDynamics, static_class::ClassStatics};
+use crate::parser::{
+  attribute_info::{code::code_generator::Instructions, Attribute},
+  classfile::ClassFile
+};
 
 mod dynamic_class;
 mod static_class;
@@ -710,13 +713,38 @@ impl JVM {
               return Some(val);
             }
             Instructions::r#return => return None,
-            Instructions::getstatic { fieldref: _ } => todo!(),
-            Instructions::putstatic { fieldref } => {
+            Instructions::getstatic { fieldref } => {
               let class = self.classes.get(&fieldref.class.to_string()).unwrap();
-              let _field = class.fields.get(&fieldref.name_and_type.to_string()).unwrap();
+              let field = class.fields.get(&fieldref.name_and_type.to_string()).unwrap();
+              todo!();
+              // stack.push(field.value);
             }
-            Instructions::getfield { fieldref: _ } => todo!(),
-            Instructions::putfield { fieldref: _ } => todo!(),
+            Instructions::putstatic { fieldref } => {
+              let value = stack.pop().unwrap();
+              let class = self.classes.get(&fieldref.class.to_string()).unwrap();
+              let field = class.fields.get(&fieldref.name_and_type.to_string()).unwrap();
+              todo!();
+              // field.value = value;
+            }
+            Instructions::getfield { fieldref } => {
+              let objectref =
+                get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
+              let HeapType::Class(objectref) = objectref else {panic!()};
+              let object = objectref.borrow();
+              let field = object.fields.get(&fieldref.name_and_type.to_string()).unwrap();
+              todo!();
+              // stack.push(field.value);
+            }
+            Instructions::putfield { fieldref } => {
+              let value = stack.pop().unwrap();
+              let objectref =
+                get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
+              let HeapType::Class(objectref) = objectref else {panic!()};
+              let mut object = objectref.borrow_mut();
+              let mut field = object.fields.get(&fieldref.name_and_type.to_string()).unwrap();
+              todo!();
+              // field.value = value;
+            }
             Instructions::invokevirtual { methodref: _ } => todo!(),
             Instructions::invokespecial { methodref: _ } => todo!(),
             Instructions::invokestatic { methodref: _ } => todo!(),
@@ -727,7 +755,7 @@ impl JVM {
               let new = classobj.instantiate();
               stack.push(Type::Reference(Some(HeapType::Class(new))));
             }
-            Instructions::newarray { atype: _ } => todo!(),
+            Instructions::newarray { atype: _ } => {}
             Instructions::anewarray { index: _ } => todo!(),
             Instructions::arraylength => todo!(),
             Instructions::athrow => todo!(),

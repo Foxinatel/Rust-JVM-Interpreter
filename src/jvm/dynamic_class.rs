@@ -5,6 +5,6 @@ use crate::parser::{attribute_info::Attribute, field_info::FieldInfo, method_inf
 #[derive(Debug, Clone)]
 pub struct ClassDynamics {
   pub fields: HashMap<String, FieldInfo>,
-  pub methods: HashMap<String, MethodInfo>,
+  pub methods: HashMap<String, MethodInfo>
   // pub attributes: Vec<Attribute>
 }

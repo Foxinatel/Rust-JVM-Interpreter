@@ -1,8 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::parser::classfile::ClassFile;
-
 use super::static_class::ClassStatics;
+use crate::parser::classfile::ClassFile;
 
 pub struct Resolver {
   pub resolved: HashMap<String, ClassStatics>
