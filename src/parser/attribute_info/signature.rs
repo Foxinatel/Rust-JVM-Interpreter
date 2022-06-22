@@ -1,5 +1,5 @@
 use super::Attribute;
-use crate::{parser::cp_info_resolved::ResolvedCpInfo, stream_reader::StreamReader};
+use crate::parser::{cp_info_resolved::ResolvedCpInfo, stream_reader::StreamReader};
 
 pub fn read(sr: &mut StreamReader, constant_pool: &Vec<ResolvedCpInfo>) -> Attribute {
   let signature_index = sr.get_u16();

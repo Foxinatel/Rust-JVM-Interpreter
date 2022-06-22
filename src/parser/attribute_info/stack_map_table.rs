@@ -1,5 +1,5 @@
 use super::{attribute::stack_map_frame::StackMapFrame, Attribute};
-use crate::stream_reader::StreamReader;
+use crate::parser::stream_reader::StreamReader;
 
 pub fn read(sr: &mut StreamReader) -> Attribute {
   let number_of_entries = sr.get_u16();

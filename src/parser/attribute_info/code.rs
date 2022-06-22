@@ -5,7 +5,7 @@ use self::{
   code_generator::{generate_instructions, Instructions}
 };
 use super::{attribute::exception::Exception, Attribute};
-use crate::{parser::cp_info_resolved::ResolvedCpInfo, stream_reader::StreamReader};
+use crate::parser::{cp_info_resolved::ResolvedCpInfo, stream_reader::StreamReader};
 
 pub mod clean_jumps;
 pub mod code_generator;

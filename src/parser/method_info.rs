@@ -2,9 +2,9 @@ use bitmask::bitmask;
 
 use super::{
   attribute_info::Attribute,
-  cp_info_resolved::{NameAndType, ResolvedCpInfo}
+  cp_info_resolved::{NameAndType, ResolvedCpInfo},
+  stream_reader::StreamReader
 };
-use crate::stream_reader::StreamReader;
 
 bitmask! {
   #[derive(Debug)]

@@ -13,8 +13,7 @@ use self::{
   },
   code::code_generator::Instructions
 };
-use super::cp_info_resolved::ResolvedCpInfo;
-use crate::stream_reader::StreamReader;
+use super::{cp_info_resolved::ResolvedCpInfo, stream_reader::StreamReader};
 
 pub mod annotation_default;
 pub mod attribute;

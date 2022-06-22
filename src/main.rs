@@ -2,11 +2,10 @@
 
 use std::env;
 
-use crate::evaluate::JVM;
+use crate::jvm::JVM;
 
-mod evaluate;
+mod jvm;
 mod parser;
-mod stream_reader;
 
 fn main() {
   let path = env::args().skip(1).next().expect("Expected File Name");

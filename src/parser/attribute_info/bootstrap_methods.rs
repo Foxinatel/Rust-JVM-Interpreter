@@ -1,5 +1,5 @@
 use super::{attribute::bootstrap_method::BootstrapMethod, Attribute};
-use crate::stream_reader::StreamReader;
+use crate::parser::stream_reader::StreamReader;
 
 pub fn read(sr: &mut StreamReader) -> Attribute {
   let num_bootstrap_methods = sr.get_u16();

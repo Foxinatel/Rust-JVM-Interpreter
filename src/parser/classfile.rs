@@ -1,8 +1,6 @@
 use std::{
-  cell::RefCell,
   collections::{HashMap, HashSet},
-  fs,
-  rc::Rc
+  fs
 };
 
 use bitmask::bitmask;
@@ -12,9 +10,9 @@ use super::{
   cp_info::CpInfo,
   cp_info_resolved::{Class, ResolvedCpInfo},
   field_info::FieldInfo,
-  method_info::MethodInfo
+  method_info::MethodInfo,
+  stream_reader::StreamReader
 };
-use crate::stream_reader::StreamReader;
 
 bitmask! {
   #[derive(Debug)]

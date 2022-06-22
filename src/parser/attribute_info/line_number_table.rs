@@ -1,5 +1,5 @@
 use super::{attribute::line_number::LineNumber, Attribute};
-use crate::stream_reader::StreamReader;
+use crate::parser::stream_reader::StreamReader;
 
 pub fn read(sr: &mut StreamReader) -> Attribute {
   let line_number_table_length = sr.get_u16();

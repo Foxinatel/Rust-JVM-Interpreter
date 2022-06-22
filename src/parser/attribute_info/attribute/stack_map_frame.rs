@@ -1,5 +1,5 @@
 use self::verification_type_info::VerificationTypeInfo;
-use crate::stream_reader::StreamReader;
+use crate::parser::stream_reader::StreamReader;
 
 mod verification_type_info;
 

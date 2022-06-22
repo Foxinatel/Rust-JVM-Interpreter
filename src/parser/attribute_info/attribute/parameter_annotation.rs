@@ -1,5 +1,5 @@
 use super::annotation::Annotation;
-use crate::stream_reader::StreamReader;
+use crate::parser::stream_reader::StreamReader;
 
 #[derive(Debug, Clone)]
 pub struct ParameterAnnotation {

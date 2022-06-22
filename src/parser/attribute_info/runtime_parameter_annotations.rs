@@ -1,5 +1,5 @@
 use super::{attribute::parameter_annotation::ParameterAnnotation, Attribute};
-use crate::stream_reader::StreamReader;
+use crate::parser::stream_reader::StreamReader;
 
 pub fn read<const VISIBLE: bool>(sr: &mut StreamReader) -> Attribute {
   let num_annotations = sr.get_u16();

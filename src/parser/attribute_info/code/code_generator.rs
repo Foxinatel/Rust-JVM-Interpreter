@@ -1,5 +1,5 @@
-use crate::{
-  parser::cp_info_resolved::{
+use crate::parser::{
+  cp_info_resolved::{
     Class,
     Fieldref,
     InterfaceMethodref,

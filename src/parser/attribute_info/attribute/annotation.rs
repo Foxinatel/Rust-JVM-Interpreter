@@ -1,5 +1,5 @@
 use super::element_value::ElementValue;
-use crate::stream_reader::StreamReader;
+use crate::parser::stream_reader::StreamReader;
 
 #[derive(Debug, Clone)]
 pub struct Annotation {

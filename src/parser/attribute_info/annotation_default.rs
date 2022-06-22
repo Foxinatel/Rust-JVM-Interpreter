@@ -1,5 +1,5 @@
 use super::{attribute::element_value::ElementValue, Attribute};
-use crate::{parser::cp_info_resolved::ResolvedCpInfo, stream_reader::StreamReader};
+use crate::parser::{cp_info_resolved::ResolvedCpInfo, stream_reader::StreamReader};
 
 pub fn read(sr: &mut StreamReader, constant_pool: &Vec<ResolvedCpInfo>) -> Attribute {
   let attribute_name_index = sr.get_u16();

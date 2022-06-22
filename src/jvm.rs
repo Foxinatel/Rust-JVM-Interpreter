@@ -1,9 +1,7 @@
 use std::{cell::RefCell, collections::HashMap, env, path::Path, rc::Rc};
 
-use crate::parser::{
-  attribute_info::{code::code_generator::Instructions, Attribute},
-  classfile::ClassFile
-};
+use crate::parser::attribute_info::code::code_generator::Instructions;
+use crate::parser::{attribute_info::Attribute, classfile::ClassFile};
 
 #[derive(Debug)]
 pub enum HeapType {
@@ -731,8 +729,7 @@ impl JVM {
             Instructions::invokedynamic { invokedynamic: _ } => todo!(),
             Instructions::new { class } => {
               let classobj = self.classes.get(&class.name).unwrap();
-              let reference =
-                Some(Rc::new(RefCell::new(HeapType::Class(classobj.clone()))));
+              let reference = Some(Rc::new(RefCell::new(HeapType::Class(classobj.clone()))));
               stack.push(Type::Reference(reference));
             }
             Instructions::newarray { atype: _ } => todo!(),
