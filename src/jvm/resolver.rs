@@ -2,8 +2,10 @@ use std::collections::{HashMap, HashSet};
 
 use crate::parser::classfile::ClassFile;
 
+use super::static_class::ClassStatics;
+
 pub struct Resolver {
-  pub resolved: HashMap<String, ClassFile>
+  pub resolved: HashMap<String, ClassStatics>
 }
 
 impl Resolver {
@@ -15,7 +17,7 @@ impl Resolver {
         continue;
       };
       let (name, cf, depends) = ClassFile::read(module.to_string());
-      self.resolved.insert(name, cf);
+      self.resolved.insert(name, ClassStatics::from(cf));
       self.resolve(depends)
     }
   }

@@ -1,21 +1,24 @@
 use std::{cell::RefCell, collections::HashMap, env, path::Path, rc::Rc};
 
-use crate::parser::attribute_info::code::code_generator::Instructions;
-use crate::parser::{attribute_info::Attribute, classfile::ClassFile};
+use self::{static_class::ClassStatics, dynamic_class::ClassDynamics};
+use crate::parser::{classfile::ClassFile, attribute_info::{Attribute, code::code_generator::Instructions}};
 
-#[derive(Debug)]
+mod dynamic_class;
+mod static_class;
+
+#[derive(Debug, Clone)]
 pub enum HeapType {
-  Class(ClassFile),
+  Class(Rc<RefCell<ClassDynamics>>),
   Interface(),
 
-  ArrayI(Vec<i32>),
-  ArrayL(Vec<i64>),
-  ArrayF(Vec<f32>),
-  ArrayD(Vec<f64>),
-  ArrayB(Vec<i8>),
-  ArrayC(Vec<u16>),
-  ArrayS(Vec<i16>),
-  ArrayA(Vec<Option<Rc<RefCell<HeapType>>>>)
+  ArrayI(Rc<RefCell<Vec<i32>>>),
+  ArrayL(Rc<RefCell<Vec<i64>>>),
+  ArrayF(Rc<RefCell<Vec<f32>>>),
+  ArrayD(Rc<RefCell<Vec<f64>>>),
+  ArrayB(Rc<RefCell<Vec<i8>>>),
+  ArrayC(Rc<RefCell<Vec<u16>>>),
+  ArrayS(Rc<RefCell<Vec<i16>>>),
+  ArrayA(Rc<RefCell<Vec<Option<HeapType>>>>)
 }
 
 #[derive(Debug, Clone)]
@@ -25,10 +28,8 @@ pub enum Type {
   Long(i64),
   Float(f32),
   Double(f64),
-
   ReturnAddress(usize),
-
-  Reference(Option<Rc<RefCell<HeapType>>>)
+  Reference(Option<HeapType>)
 }
 
 // This macro chopped out so much bloat, thank god
@@ -54,7 +55,8 @@ mod resolver;
 #[derive(Debug)]
 pub struct JVM {
   entrypoint: String,
-  classes: HashMap<String, ClassFile>
+  // classes: HashMap<String, ClassFile>
+  classes: HashMap<String, ClassStatics>
 }
 
 //set current directory to the target's directory
@@ -65,14 +67,17 @@ impl JVM {
     let newpath = String::from(Path::new(&path).file_name().unwrap().to_str().unwrap());
     let (name, cf, depends) = ClassFile::read(newpath);
     let mut resolver = resolver::Resolver::new();
-    resolver.resolved.insert(name.clone(), cf);
+    resolver.resolved.insert(name.clone(), ClassStatics::from(cf));
     resolver.resolve(depends);
     Self { entrypoint: name, classes: resolver.resolved }
   }
 
-  pub fn start(&self) { let _cf = self.classes.get(&self.entrypoint).unwrap(); }
+  pub fn start(&self) {
+    let _cf = self.classes.get(&self.entrypoint).unwrap();
+    todo!();
+  }
 
-  //Should probably change this to use a MethodInfo
+  // Should probably change this to use a MethodInfo
   fn evaluate(&self, code: Attribute) -> Option<Type> {
     match code {
       Attribute::Code { max_stack, max_locals, code, exception_table: _, attributes: _ } => {
@@ -117,64 +122,64 @@ impl JVM {
               let index = get_type!(Int, stack.pop().unwrap());
               let reference =
                 get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
-              let arrayref = reference.borrow_mut();
-              let HeapType::ArrayI(array) = &*arrayref else {panic!()};
+              let HeapType::ArrayI(arrayref) = &reference else {panic!()};
+              let array = arrayref.borrow();
               stack.push(Type::Int(array[index as usize]))
             }
             Instructions::laload => {
               let index = get_type!(Int, stack.pop().unwrap());
               let reference =
                 get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
-              let arrayref = reference.borrow_mut();
-              let HeapType::ArrayL(array) = &*arrayref else {panic!()};
+              let HeapType::ArrayL(arrayref) = &reference else {panic!()};
+              let array = arrayref.borrow();
               stack.push(Type::Long(array[index as usize]))
             }
             Instructions::faload => {
               let index = get_type!(Int, stack.pop().unwrap());
               let reference =
                 get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
-              let arrayref = reference.borrow_mut();
-              let HeapType::ArrayF(array) = &*arrayref else {panic!()};
+              let HeapType::ArrayF(arrayref) = &reference else {panic!()};
+              let array = arrayref.borrow();
               stack.push(Type::Float(array[index as usize]))
             }
             Instructions::daload => {
               let index = get_type!(Int, stack.pop().unwrap());
               let reference =
                 get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
-              let arrayref = reference.borrow_mut();
-              let HeapType::ArrayD(array) = &*arrayref else {panic!()};
+              let HeapType::ArrayD(arrayref) = &reference else {panic!()};
+              let array = arrayref.borrow();
               stack.push(Type::Double(array[index as usize]))
             }
             Instructions::aaload => {
               let index = get_type!(Int, stack.pop().unwrap());
               let reference =
                 get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
-              let arrayref = reference.borrow_mut();
-              let HeapType::ArrayA(array) = &*arrayref else {panic!()};
+              let HeapType::ArrayA(arrayref) = &reference else {panic!()};
+              let array = arrayref.borrow();
               stack.push(Type::Reference(array[index as usize].clone()))
             }
             Instructions::baload => {
               let index = get_type!(Int, stack.pop().unwrap());
               let reference =
                 get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
-              let arrayref = reference.borrow_mut();
-              let HeapType::ArrayB(array) = &*arrayref else {panic!()};
+              let HeapType::ArrayB(arrayref) = &reference else {panic!()};
+              let array = arrayref.borrow();
               stack.push(Type::Int(array[index as usize] as i32))
             }
             Instructions::caload => {
               let index = get_type!(Int, stack.pop().unwrap());
               let reference =
                 get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
-              let arrayref = reference.borrow_mut();
-              let HeapType::ArrayC(array) = &*arrayref else {panic!()};
+              let HeapType::ArrayC(arrayref) = &reference else {panic!()};
+              let array = arrayref.borrow();
               stack.push(Type::Int(array[index as usize] as i32))
             }
             Instructions::saload => {
               let index = get_type!(Int, stack.pop().unwrap());
               let reference =
                 get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
-              let arrayref = reference.borrow_mut();
-              let HeapType::ArrayS(array) = &*arrayref else {panic!()};
+              let HeapType::ArrayS(arrayref) = &reference else {panic!()};
+              let array = arrayref.borrow();
               stack.push(Type::Int(array[index as usize] as i32))
             }
             Instructions::istore { index } => {
@@ -207,8 +212,8 @@ impl JVM {
               let index = get_type!(Int, stack.pop().unwrap());
               let reference =
                 get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
-              let mut arrayref = reference.borrow_mut();
-              let HeapType::ArrayI(ref mut array) = *arrayref else {panic!()};
+              let HeapType::ArrayI(arrayref) = &reference else {panic!()};
+              let mut array = arrayref.borrow_mut();
               array[index as usize] = value;
             }
             Instructions::lastore => {
@@ -216,8 +221,8 @@ impl JVM {
               let index = get_type!(Int, stack.pop().unwrap());
               let reference =
                 get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
-              let mut arrayref = reference.borrow_mut();
-              let HeapType::ArrayL(ref mut array) = *arrayref else {panic!()};
+              let HeapType::ArrayL(arrayref) = &reference else {panic!()};
+              let mut array = arrayref.borrow_mut();
               array[index as usize] = value;
             }
             Instructions::fastore => {
@@ -225,8 +230,8 @@ impl JVM {
               let index = get_type!(Int, stack.pop().unwrap());
               let reference =
                 get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
-              let mut arrayref = reference.borrow_mut();
-              let HeapType::ArrayF(ref mut array) = *arrayref else {panic!()};
+              let HeapType::ArrayF(arrayref) = &reference else {panic!()};
+              let mut array = arrayref.borrow_mut();
               array[index as usize] = value;
             }
             Instructions::dastore => {
@@ -234,8 +239,8 @@ impl JVM {
               let index = get_type!(Int, stack.pop().unwrap());
               let reference =
                 get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
-              let mut arrayref = reference.borrow_mut();
-              let HeapType::ArrayD(ref mut array) = *arrayref else {panic!()};
+              let HeapType::ArrayD(arrayref) = &reference else {panic!()};
+              let mut array = arrayref.borrow_mut();
               array[index as usize] = value;
             }
             Instructions::aastore => {
@@ -243,8 +248,8 @@ impl JVM {
               let index = get_type!(Int, stack.pop().unwrap());
               let reference =
                 get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
-              let mut arrayref = reference.borrow_mut();
-              let HeapType::ArrayA(ref mut array) = *arrayref else {panic!()};
+              let HeapType::ArrayA(arrayref) = &reference else {panic!()};
+              let mut array = arrayref.borrow_mut();
               array[index as usize] = value;
             }
             Instructions::bastore => {
@@ -252,8 +257,8 @@ impl JVM {
               let index = get_type!(Int, stack.pop().unwrap());
               let reference =
                 get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
-              let mut arrayref = reference.borrow_mut();
-              let HeapType::ArrayB(ref mut array) = *arrayref else {panic!()};
+              let HeapType::ArrayB(arrayref) = &reference else {panic!()};
+              let mut array = arrayref.borrow_mut();
               array[index as usize] = value as i8;
             }
             Instructions::castore => {
@@ -261,8 +266,8 @@ impl JVM {
               let index = get_type!(Int, stack.pop().unwrap());
               let reference =
                 get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
-              let mut arrayref = reference.borrow_mut();
-              let HeapType::ArrayC(ref mut array) = *arrayref else {panic!()};
+              let HeapType::ArrayC(arrayref) = &reference else {panic!()};
+              let mut array = arrayref.borrow_mut();
               array[index as usize] = value as u16;
             }
             Instructions::sastore => {
@@ -270,8 +275,8 @@ impl JVM {
               let index = get_type!(Int, stack.pop().unwrap());
               let reference =
                 get_type!(Reference, stack.pop().unwrap()).expect("NullPointerException");
-              let mut arrayref = reference.borrow_mut();
-              let HeapType::ArrayS(ref mut array) = *arrayref else {panic!()};
+              let HeapType::ArrayS(arrayref) = &reference else {panic!()};
+              let mut array = arrayref.borrow_mut();
               array[index as usize] = value as i16;
             }
             Instructions::pop => {
@@ -659,24 +664,14 @@ impl JVM {
             Instructions::if_acmpeq { offset } => {
               let value2 = get_type!(Reference, stack.pop().unwrap());
               let value1 = get_type!(Reference, stack.pop().unwrap());
-              if match (value1, value2) {
-                (None, None) => true,
-                (None, Some(_)) => false,
-                (Some(_), None) => false,
-                (Some(value1), Some(value2)) => Rc::ptr_eq(&value1, &value2)
-              } {
+              if refeq(value1, value2) {
                 pc = (pc as isize + *offset as isize - 1) as usize;
               }
             }
             Instructions::if_acmpne { offset } => {
               let value2 = get_type!(Reference, stack.pop().unwrap());
               let value1 = get_type!(Reference, stack.pop().unwrap());
-              if !match (value1, value2) {
-                (None, None) => true,
-                (None, Some(_)) => false,
-                (Some(_), None) => false,
-                (Some(value1), Some(value2)) => Rc::ptr_eq(&value1, &value2)
-              } {
+              if !refeq(value1, value2) {
                 pc = (pc as isize + *offset as isize - 1) as usize;
               }
             }
@@ -729,8 +724,8 @@ impl JVM {
             Instructions::invokedynamic { invokedynamic: _ } => todo!(),
             Instructions::new { class } => {
               let classobj = self.classes.get(&class.name).unwrap();
-              let reference = Some(Rc::new(RefCell::new(HeapType::Class(classobj.clone()))));
-              stack.push(Type::Reference(reference));
+              let new = classobj.instantiate();
+              stack.push(Type::Reference(Some(HeapType::Class(new))));
             }
             Instructions::newarray { atype: _ } => todo!(),
             Instructions::anewarray { index: _ } => todo!(),
@@ -752,6 +747,29 @@ impl JVM {
         }
       }
       _ => panic!("Tried to evaluate a non-code attribute")
+    }
+  }
+}
+
+fn refeq(value1: Option<HeapType>, value2: Option<HeapType>) -> bool {
+  match (value1, value2) {
+    (None, None) => true,
+    (None, Some(_)) => false,
+    (Some(_), None) => false,
+    (Some(value1), Some(value2)) => {
+      match (value1, value2) {
+        (HeapType::Class(ref1), HeapType::Class(ref2)) => Rc::ptr_eq(&ref1, &ref2),
+        //(HeapType::Interface(ref1), HeapType::Interface(ref2)) => Rc::ptr_eq(&ref1, &ref2),
+        (HeapType::ArrayI(ref1), HeapType::ArrayI(ref2)) => Rc::ptr_eq(&ref1, &ref2),
+        (HeapType::ArrayL(ref1), HeapType::ArrayL(ref2)) => Rc::ptr_eq(&ref1, &ref2),
+        (HeapType::ArrayF(ref1), HeapType::ArrayF(ref2)) => Rc::ptr_eq(&ref1, &ref2),
+        (HeapType::ArrayD(ref1), HeapType::ArrayD(ref2)) => Rc::ptr_eq(&ref1, &ref2),
+        (HeapType::ArrayB(ref1), HeapType::ArrayB(ref2)) => Rc::ptr_eq(&ref1, &ref2),
+        (HeapType::ArrayC(ref1), HeapType::ArrayC(ref2)) => Rc::ptr_eq(&ref1, &ref2),
+        (HeapType::ArrayS(ref1), HeapType::ArrayS(ref2)) => Rc::ptr_eq(&ref1, &ref2),
+        (HeapType::ArrayA(ref1), HeapType::ArrayA(ref2)) => Rc::ptr_eq(&ref1, &ref2),
+        _ => false
+      }
     }
   }
 }
