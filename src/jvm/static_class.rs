@@ -1,8 +1,8 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-use super::dynamic_class::ClassDynamics;
+use super::{dynamic_class::ClassDynamics, eval::Eval};
 use crate::parser::{
-  attribute_info::{attribute, Attribute},
+  attribute_info::Attribute,
   classfile::{ClassAccessFlags, ClassFile},
   cp_info_resolved::Class,
   field_info::{self, FieldInfo},
@@ -60,4 +60,10 @@ impl ClassStatics {
   pub fn instantiate(&self) -> Rc<RefCell<ClassDynamics>> {
     Rc::from(RefCell::from(self.dynamic.clone()))
   }
+}
+
+impl Eval for ClassStatics {
+    fn get_methods(&self) -> &HashMap<String, MethodInfo> {
+        &self.methods
+    }
 }

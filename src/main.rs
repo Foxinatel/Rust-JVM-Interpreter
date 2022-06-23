@@ -15,4 +15,6 @@ fn main() {
 
   let jvm = JVM::from_path(path);
   println!("{:#?}", jvm);
+
+  jvm.start()
 }
